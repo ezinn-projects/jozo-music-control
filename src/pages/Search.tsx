@@ -1,10 +1,24 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Switch from "@/components/Switch";
 import SongCard from "@/components/SongCard";
 
-const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 const BASE_URL = "https://www.googleapis.com/youtube/v3/search";
+
+const API_KEYS = [
+  "AIzaSyBWw8iM6ePMGS4Rli-nGZhd_XR6a5qftn8",
+  "AIzaSyBw0PUNvxg4Swa5o6NHnyGau8KI7WfZ5g4",
+  "AIzaSyDVFaMtyhuPevzta1LLP9b8Tg0GuzbulQE",
+];
+let currentKeyIndex = 0;
+
+function getCurrentKey() {
+  return API_KEYS[currentKeyIndex];
+}
+
+function switchToNextKey() {
+  currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+}
 
 interface YouTubeItem {
   id: {
@@ -37,6 +51,8 @@ const Search: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isKaraokeMode, setIsKaraokeMode] = useState<boolean>(true);
 
+  console.log("isLoading :>> ", isLoading);
+
   const handleSearch = async (query: string, pageToken: string = "") => {
     if (!query) return;
 
@@ -47,35 +63,66 @@ const Search: React.FC = () => {
       setResults([]);
     }
 
-    try {
-      const response = await axios.get(BASE_URL, {
-        params: {
-          part: "snippet",
-          q: isKaraokeMode ? `karaoke ${query}` : query,
-          maxResults: 50,
-          pageToken,
-          key: API_KEY,
-          fields:
-            "items(id/videoId,snippet(title,thumbnails/medium/url,channelTitle)),nextPageToken",
-        },
-      });
+    let attempt = 0;
+    const maxAttempts = API_KEYS.length;
 
-      const items = response.data.items.map((item: YouTubeItem) => ({
-        videoId: item.id.videoId,
-        title: item.snippet.title,
-        thumbnail: item.snippet.thumbnails.medium.url,
-        channelTitle: item.snippet.channelTitle || "Unknown Artist",
-      }));
+    while (attempt < maxAttempts) {
+      const currentKey = getCurrentKey();
 
-      setResults((prev) => (pageToken ? [...prev, ...items] : items));
-      setNextPageToken(response.data.nextPageToken || null);
-    } catch (error) {
-      console.error("Error fetching search results:", error);
-      setError("Không thể tải kết quả tìm kiếm. Vui lòng thử lại.");
-    } finally {
-      setIsLoading(false);
-      setIsFetchingMore(false);
+      try {
+        const response = await axios.get(BASE_URL, {
+          params: {
+            part: "snippet",
+            q: isKaraokeMode ? `karaoke ${query}` : query,
+            maxResults: 50,
+            pageToken,
+            key: currentKey,
+            fields:
+              "items(id/videoId,snippet(title,thumbnails/medium/url,channelTitle)),nextPageToken",
+          },
+        });
+
+        const items = response.data.items.map((item: YouTubeItem) => ({
+          videoId: item.id.videoId,
+          title: item.snippet.title,
+          thumbnail: item.snippet.thumbnails.medium.url,
+          channelTitle: item.snippet.channelTitle || "Unknown Artist",
+        }));
+
+        setResults((prev) => (pageToken ? [...prev, ...items] : items));
+        setNextPageToken(response.data.nextPageToken || null);
+        setIsLoading(false);
+        setIsFetchingMore(false);
+        return; // Thành công, thoát khỏi vòng lặp
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        console.error(
+          `Error fetching search results with key ${currentKey}:`,
+          error
+        );
+
+        // Nếu lỗi liên quan đến quota, chuyển sang key tiếp theo
+        if (axiosError.response?.status === 403) {
+          console.log(
+            `Key ${currentKey} hết quota. Chuyển sang key tiếp theo...`
+          );
+          switchToNextKey();
+          attempt++;
+        } else {
+          // Lỗi khác không liên quan đến quota
+          setError("Không thể tải kết quả tìm kiếm. Vui lòng thử lại.");
+          break;
+        }
+      }
     }
+
+    // Nếu tất cả các keys đều thất bại
+    if (attempt >= maxAttempts) {
+      setError("Tất cả các keys đã hết quota. Vui lòng thử lại sau.");
+    }
+
+    setIsLoading(false);
+    setIsFetchingMore(false);
   };
 
   useEffect(() => {
