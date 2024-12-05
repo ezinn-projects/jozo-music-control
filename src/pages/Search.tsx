@@ -98,17 +98,35 @@ const Search: React.FC = () => {
     }
   }, [nextPageToken, searchTerm]);
 
+  const handleClearResults = () => {
+    setSearchTerm("");
+    setResults([]);
+    setNextPageToken(null);
+    setError(null);
+  };
+
   return (
     <div className="space-y-6">
       {/* Search Input */}
       <div className="flex items-center space-x-4">
-        <input
-          type="text"
-          placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm"
-        />
+        <div className="flex w-full items-center space-x-2 border bg-gray-200 border-gray-300 rounded-lg px-3 py-2 shadow-sm">
+          <input
+            type="text"
+            placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border-none outline-none bg-inherit"
+          />
+          {searchTerm && (
+            <button
+              onClick={handleClearResults}
+              className="text-gray-500 hover:text-red-500 transition-colors"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
         {/* Karaoke Mode Switch */}
         <div className="flex items-center space-x-2 flex-shrink-0">
           <label className="text-sm text-gray-700">Karaoke Mode</label>
