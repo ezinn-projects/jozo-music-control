@@ -20,12 +20,24 @@ const SongCard: React.FC<SongCardProps> = ({
   const { addSongToEnd, addSongToTop } = useQueue();
 
   const handleAddToTop = () => {
-    addSongToTop({ videoId, title, thumbnail, channelTitle });
+    addSongToTop({
+      videoId,
+      title,
+      thumbnail,
+      channelTitle,
+      isPlaying: false,
+    });
     setIsModalOpen(false);
   };
 
   const handleAddToEnd = () => {
-    addSongToEnd({ videoId, title, thumbnail, channelTitle });
+    addSongToEnd({
+      videoId,
+      title,
+      thumbnail,
+      channelTitle,
+      isPlaying: false,
+    });
     setIsModalOpen(false);
   };
 

@@ -5,11 +5,8 @@ import SongCard from "@/components/SongCard";
 
 const BASE_URL = "https://www.googleapis.com/youtube/v3/search";
 
-const API_KEYS = [
-  "AIzaSyBWw8iM6ePMGS4Rli-nGZhd_XR6a5qftn8",
-  "AIzaSyBw0PUNvxg4Swa5o6NHnyGau8KI7WfZ5g4",
-  "AIzaSyDVFaMtyhuPevzta1LLP9b8Tg0GuzbulQE",
-];
+const API_KEYS = import.meta.env.VITE_API_KEYS.split(",");
+
 let currentKeyIndex = 0;
 
 function getCurrentKey() {
