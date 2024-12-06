@@ -1,29 +1,26 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import ControlBar from "@/components/ControlBar";
+import Header from "@/components/Header";
+import React from "react";
 
-const DefaultLayout: React.FC = () => {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col min-h-screen">
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-gray-100">
-        <div className="container mx-auto px-4 py-6">
-          <Outlet /> {/* Render nội dung của từng trang */}
-        </div>
-      </main>
-
-      {/* Music Controls */}
-      <ControlBar />
+      <div className="flex-1 overflow-auto">{children}</div>
 
       {/* Footer */}
-      <Footer />
+      <footer className="">
+        <ControlBar />
+      </footer>
     </div>
   );
 };
 
-export default DefaultLayout;
+export default Layout;

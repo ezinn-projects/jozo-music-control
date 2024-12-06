@@ -48,8 +48,6 @@ const Search: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isKaraokeMode, setIsKaraokeMode] = useState<boolean>(true);
 
-  console.log("isLoading :>> ", isLoading);
-
   const handleSearch = async (query: string, pageToken: string = "") => {
     if (!query) return;
 
@@ -135,6 +133,8 @@ const Search: React.FC = () => {
 
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, isKaraokeMode]);
+
+  console.log("isLoading :>> ", searchTerm);
 
   const handleLoadMore = useCallback(() => {
     if (nextPageToken) {

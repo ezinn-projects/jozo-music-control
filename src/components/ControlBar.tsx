@@ -17,7 +17,7 @@ const ControlBar: React.FC = () => {
   return (
     <>
       {/* Control Bar */}
-      <div className="fixed bottom-9 left-0 right-0 bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow-lg gap-x-6 z-50">
+      <div className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow-lg gap-x-6 z-50">
         {/* Left: Song Info */}
         <div className="flex items-center space-x-4 flex-shrink-0">
           <img
@@ -26,9 +26,7 @@ const ControlBar: React.FC = () => {
             className="w-12 h-12 object-cover rounded"
           />
           <div>
-            <p className="text-sm font-bold animate-marquee">
-              {currentSong.title}
-            </p>
+            <p className="text-sm font-bold">{currentSong.title}</p>
             <p className="text-xs text-gray-400">{currentSong.artist}</p>
           </div>
         </div>
