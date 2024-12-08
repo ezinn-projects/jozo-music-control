@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "@/components/Modal";
-import { useQueue } from "@/contexts/QueueContext";
+import { useQueueMutations } from "@/hooks/useQueueMutations"; // Đường dẫn file hook
 
 interface SongCardProps {
   videoId: string;
@@ -16,27 +16,24 @@ const SongCard: React.FC<SongCardProps> = ({
   channelTitle,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { addSongToQueue } = useQueueMutations();
 
-  const { addSongToEnd, addSongToTop } = useQueue();
+  const roomId = "1"; // Lấy roomId từ context hoặc prop
 
   const handleAddToTop = () => {
-    addSongToTop({
-      videoId,
-      title,
-      thumbnail,
-      channelTitle,
-      isPlaying: false,
+    addSongToQueue.mutate({
+      song: { videoId, title, thumbnail, channelTitle },
+      position: "top",
+      roomId,
     });
     setIsModalOpen(false);
   };
 
   const handleAddToEnd = () => {
-    addSongToEnd({
-      videoId,
-      title,
-      thumbnail,
-      channelTitle,
-      isPlaying: false,
+    addSongToQueue.mutate({
+      song: { videoId, title, thumbnail, channelTitle },
+      position: "end",
+      roomId,
     });
     setIsModalOpen(false);
   };
@@ -44,7 +41,7 @@ const SongCard: React.FC<SongCardProps> = ({
   return (
     <div>
       <div
-        className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+        className="shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
         onClick={() => setIsModalOpen(true)}
       >
         <img src={thumbnail} alt={title} className="w-full h-40 object-cover" />

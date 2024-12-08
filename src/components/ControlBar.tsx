@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import BackwordIcon from "@/assets/icons/BackwordIcon";
+import ForwardIcon from "@/assets/icons/ForwardIcon";
+import PauseIcon from "@/assets/icons/PauseIcon";
+import PlayIcon from "@/assets/icons/PlayIcon";
 import { useQueue } from "@/contexts/QueueContext";
-import QueueSidebar from "./QueueSidebar";
+import React, { useState } from "react";
 
-const ControlBar: React.FC = () => {
-  const [isQueueOpen, setIsQueueOpen] = useState(false);
+type Props = {
+  onToggleQueue: () => void;
+};
+
+const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const { queue } = useQueue();
 
-  // Mock Data for the currently playing song
   const currentSong = {
     thumbnail: "https://via.placeholder.com/64",
     title: "Tên bài hát",
@@ -17,7 +22,7 @@ const ControlBar: React.FC = () => {
   return (
     <>
       {/* Control Bar */}
-      <div className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow-lg gap-x-6 z-50">
+      <div className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow-lg gap-x-6 rounded-3xl z-30">
         {/* Left: Song Info */}
         <div className="flex items-center space-x-4 flex-shrink-0">
           <img
@@ -34,78 +39,14 @@ const ControlBar: React.FC = () => {
         {/* Center: Controls */}
         <div className="flex flex-col items-center w-full gap-y-4">
           <div className="flex items-center space-x-6">
-            <button className="text-xl">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-12"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 16.811c0 .864-.933 1.406-1.683.977l-7.108-4.061a1.125 1.125 0 0 1 0-1.954l7.108-4.061A1.125 1.125 0 0 1 21 8.689v8.122ZM11.25 16.811c0 .864-.933 1.406-1.683.977l-7.108-4.061a1.125 1.125 0 0 1 0-1.954l7.108-4.061a1.125 1.125 0 0 1 1.683.977v8.122Z"
-                />
-              </svg>
+            <button>
+              <BackwordIcon />
             </button>
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="text-2xl"
-            >
-              {isPlaying ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-12"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-12"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M14.25 9v6m-4.5 0V9M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                  />
-                </svg>
-              )}
+            <button onClick={() => setIsPlaying(!isPlaying)}>
+              {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
-            <button className="text-xl">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-12"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061a1.125 1.125 0 0 1-1.683-.977V8.69Z"
-                />
-              </svg>
+            <button>
+              <ForwardIcon />
             </button>
           </div>
           {/* Progress Bar */}
@@ -123,7 +64,7 @@ const ControlBar: React.FC = () => {
           {/* Queue Icon */}
           <div className="relative">
             <button
-              onClick={() => setIsQueueOpen(!isQueueOpen)}
+              onClick={onToggleQueue}
               className="text-xl hover:text-blue-500"
             >
               🎵
@@ -148,12 +89,6 @@ const ControlBar: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Queue Sidebar */}
-      <QueueSidebar
-        isOpen={isQueueOpen}
-        onClose={() => setIsQueueOpen(false)}
-      />
     </>
   );
 };

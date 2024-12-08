@@ -17,19 +17,17 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  console.log("songTitle", songTitle);
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white w-full md:w-3/4 lg:w-1/2 xl:w-1/3 rounded-lg shadow-lg p-6">
-        <h2 className="text-lg font-bold mb-4">Chọn hành động</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">Chọn hành động</h2>
         <p className="mb-6 text-gray-700">
           Bài hát: <strong>{songTitle}</strong>
         </p>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-center space-x-4">
           <button
             onClick={onAddToTop}
-            className="bg-gray-200 text-black py-2 px-4 rounded-lg hover:bg-gray-300 flex flex-col items-center gap-y-2"
+            className="bg-gray-900 text-white py-2 w-full px-4 rounded-lg hover:bg-gray-800 flex flex-col items-center gap-y-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +47,7 @@ const Modal: React.FC<ModalProps> = ({
           </button>
           <button
             onClick={onAddToEnd}
-            className="bg-gray-200 text-black py-2 px-4 rounded-lg hover:bg-gray-300 flex flex-col items-center gap-y-2"
+            className="bg-gray-900 text-white  w-full py-2 px-4 rounded-lg hover:bg-gray-800 flex flex-col items-center gap-y-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

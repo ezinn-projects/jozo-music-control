@@ -14,9 +14,14 @@ export default {
           '50%': { transform: 'translateX(0)' }, // Chạy vào khung (5s)
           '100%': { transform: 'translateX(0)' }, // Đứng yên trong khung (10s)
         },
+        breathing: {
+          "0%, 100%": { opacity: "0.6" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         marquee: 'marquee 30s linear infinite', // Tổng thời gian: 30s
+        breathing: "breathing 4s ease-in-out infinite",
       },
     },
   },
