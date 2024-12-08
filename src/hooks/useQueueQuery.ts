@@ -9,9 +9,12 @@ export const useQueueQuery = () => {
   return useQuery({
     queryKey: ["queue", roomId],
     queryFn: async () => {
-      const response = await http.get<ApiResponse<Video[]>>(
-        `/song-queue/${roomId}`
-      );
+      const response = await http.get<
+        ApiResponse<{
+          nowPlaying: Video;
+          queue: Video[];
+        }>
+      >(`/song-queue/${roomId}`);
       return response.data;
     },
     enabled: !!roomId,

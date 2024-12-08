@@ -7,6 +7,7 @@ interface SongCardProps {
   title: string;
   thumbnail: string;
   channelTitle: string;
+  duration: number;
 }
 
 const SongCard: React.FC<SongCardProps> = ({
@@ -14,6 +15,7 @@ const SongCard: React.FC<SongCardProps> = ({
   title,
   thumbnail,
   channelTitle,
+  duration,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { addSongToQueue } = useQueueMutations();
@@ -22,7 +24,7 @@ const SongCard: React.FC<SongCardProps> = ({
 
   const handleAddToTop = () => {
     addSongToQueue.mutate({
-      song: { videoId, title, thumbnail, channelTitle },
+      song: { videoId, title, thumbnail, channelTitle, duration },
       position: "top",
       roomId,
     });
@@ -31,7 +33,7 @@ const SongCard: React.FC<SongCardProps> = ({
 
   const handleAddToEnd = () => {
     addSongToQueue.mutate({
-      song: { videoId, title, thumbnail, channelTitle },
+      song: { videoId, title, thumbnail, channelTitle, duration },
       position: "end",
       roomId,
     });

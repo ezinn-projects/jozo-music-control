@@ -1,44 +1,10 @@
-import SongCard from "@/components/SongCard";
-import { useDebounce } from "@/hooks/useDebounce"; // Custom hook for debounce
-import http from "@/utils/http";
-import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-
-const BASE_URL = "https://www.googleapis.com/youtube/v3/search";
-const API_KEYS = import.meta.env.VITE_YOUTUBE_API_KEYS.split(",");
-
-// Function to rotate API keys
-let keyIndex = 0;
-const getNextApiKey = () => {
-  const key = API_KEYS[keyIndex];
-  keyIndex = (keyIndex + 1) % API_KEYS.length; // Move to the next key
-  return key;
-};
-
-const fetchResults = async (
-  query: string,
-  karaoke: boolean
-): Promise<Video[]> => {
-  if (!query) return [];
-
-  const key = getNextApiKey(); // Use rotated API key
-  const response = await http.get(BASE_URL, {
-    params: {
-      part: "snippet",
-      maxResults: 50,
-      q: karaoke ? `karaoke ${query}` : query,
-      key,
-    },
-  });
-
-  return response.data.items.map((item: YouTubeSearchItem) => ({
-    videoId: item.id.videoId,
-    title: item.snippet.title,
-    thumbnail: item.snippet.thumbnails.medium.url,
-    channelTitle: item.snippet.channelTitle || "Unknown Artist",
-  }));
-};
+import { useQuery } from "@tanstack/react-query";
+import SongCard from "@/components/SongCard";
+import { useDebounce } from "@/hooks/useDebounce";
+import { searchSongs } from "@/services/searchService";
+// import { fetchResults } from "@/services/searchService"; // Đường dẫn tới fetchResults
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -47,18 +13,19 @@ const SearchPage: React.FC = () => {
   const roomId = searchParams.get("roomId");
 
   // Debounced query
-  const debouncedQuery = useDebounce(query, 1500); // 1.5 seconds debounce
+  const debouncedQuery = useDebounce(query, 1500);
 
-  // Using TanStack Query to fetch results
+  // Sử dụng TanStack Query để fetch kết quả
   const {
     data: results = [],
     isLoading,
     isError,
   } = useQuery({
     queryKey: ["searchResults", debouncedQuery, karaoke],
-    queryFn: () => fetchResults(debouncedQuery, karaoke),
-    enabled: !!debouncedQuery && !!roomId, // Only fetch if debouncedQuery is present
-    staleTime: 1000 * 60 * 5,
+    queryFn: () =>
+      searchSongs(karaoke ? `karaoke ${debouncedQuery}` : debouncedQuery),
+    enabled: !!debouncedQuery && !!roomId,
+    staleTime: 1000 * 60 * 5, // Cache 5 phút
     retry: 3,
   });
 
@@ -73,8 +40,8 @@ const SearchPage: React.FC = () => {
       )}
 
       {!isLoading && results.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-          {results.map((result: Video) => (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {results?.map((result: Video) => (
             <SongCard key={result.videoId} {...result} />
           ))}
         </div>

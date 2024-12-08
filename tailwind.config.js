@@ -18,10 +18,17 @@ export default {
           "0%, 100%": { opacity: "0.6" },
           "50%": { opacity: "1" },
         },
+        fadeInOut: {
+          "0%": { opacity: 0 },
+          "10%": { opacity: 1 },
+          "90%": { opacity: 1 },
+          "100%": { opacity: 0 },
+        },
       },
       animation: {
         marquee: 'marquee 30s linear infinite', // Tổng thời gian: 30s
         breathing: "breathing 4s ease-in-out infinite",
+        "fade-in-out": "fade-in-out 3s ease-in-out infinite",
       },
     },
   },

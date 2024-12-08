@@ -3,12 +3,13 @@ interface ApiResponse<TData> {
   result: TData;
 }
 
-type Video = {
+interface Video {
   videoId: string;
-  thumbnail: string;
   title: string;
+  thumbnail: string;
   channelTitle: string;
-};
+  duration: number; // Nếu cần thời lượng
+}
 
 interface YouTubeSearchResponse {
   kind: string;

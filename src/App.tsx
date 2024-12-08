@@ -5,6 +5,7 @@ import { TimerProvider } from "./contexts/TimerContext";
 import { QueueProvider } from "./contexts/QueueContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ToastContainer } from "@/components/ToastContainer";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -19,7 +20,7 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       {/* The rest of your application */}
       <ReactQueryDevtools initialIsOpen={false} />
-
+      <ToastContainer />
       <BrowserRouter>
         <QueueProvider>
           <TimerProvider>
