@@ -13,7 +13,7 @@ const SearchPage: React.FC = () => {
   const roomId = searchParams.get("roomId");
 
   // Debounced query
-  const debouncedQuery = useDebounce(query, 1500);
+  const debouncedQuery = useDebounce(query, 1900);
 
   // Sử dụng TanStack Query để fetch kết quả
   const {
@@ -29,6 +29,8 @@ const SearchPage: React.FC = () => {
     retry: 3,
   });
 
+  console.log("results :>> ", results);
+
   return (
     <div className="p-4 space-y-6">
       <h2 className="text-xl font-bold">Kết quả tìm kiếm</h2>
@@ -42,7 +44,7 @@ const SearchPage: React.FC = () => {
       {!isLoading && results.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {results?.map((result: Video) => (
-            <SongCard key={result.videoId} {...result} />
+            <SongCard key={result.video_id} {...result} />
           ))}
         </div>
       )}

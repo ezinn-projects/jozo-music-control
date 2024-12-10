@@ -4,10 +4,10 @@ interface ApiResponse<TData> {
 }
 
 interface Video {
-  videoId: string;
+  video_id: string;
   title: string;
   thumbnail: string;
-  channelTitle: string;
+  author: string;
   duration: number; // Nếu cần thời lượng
 }
 
@@ -54,3 +54,5 @@ interface YouTubeThumbnail {
   width: number;
   height: number;
 }
+
+type PlaybackState = "play" | "pause";

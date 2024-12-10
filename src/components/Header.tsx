@@ -17,7 +17,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const query = params.get("query") || "";
-    const karaoke = params.get("karaoke") || "";
+    const karaoke = params.get("karaoke") || "true";
     setSearchTerm(query);
     setIsKaraoke(karaoke === "true" ? true : false);
   }, [location.search]);
@@ -32,11 +32,11 @@ const Header: React.FC = () => {
     if (value.trim()) {
       navigate(
         `/search?roomId=${roomId}&query=${encodeURIComponent(
-          value.trim()
+          value
         )}&karaoke=${isKaraoke}`
       );
     } else {
-      navigate(`/search?roomId=${roomId}`); // Xóa query params nếu rỗng
+      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`); // Xóa query params nếu rỗng
     }
   };
 
@@ -53,7 +53,7 @@ const Header: React.FC = () => {
       {/* Logo */}
       <div
         className="text-2xl font-bold cursor-pointer"
-        onClick={() => navigate("/")}
+        onClick={() => navigate(`/?roomId=${roomId}&karaoke=${isKaraoke}`)}
       >
         Jozo Karaoke
       </div>

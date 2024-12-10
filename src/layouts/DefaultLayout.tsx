@@ -8,7 +8,7 @@ const Layout: React.FC = () => {
   const [isQueueOpen, setIsQueueOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white overflow-hidden">
+    <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Header */}
       <Header />
 

@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import RoutesWrapper from "@/routes/RoutesWrapper";
 import { TimerProvider } from "./contexts/TimerContext";
-import { QueueProvider } from "./contexts/QueueContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "@/components/ToastContainer";
@@ -22,11 +21,9 @@ const App: React.FC = () => {
       <ReactQueryDevtools initialIsOpen={false} />
       <ToastContainer />
       <BrowserRouter>
-        <QueueProvider>
-          <TimerProvider>
-            <RoutesWrapper />
-          </TimerProvider>
-        </QueueProvider>
+        <TimerProvider>
+          <RoutesWrapper />
+        </TimerProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

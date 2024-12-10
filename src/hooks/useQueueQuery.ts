@@ -14,7 +14,7 @@ export const useQueueQuery = () => {
           nowPlaying: Video;
           queue: Video[];
         }>
-      >(`/song-queue/${roomId}`);
+      >(`/room-music/${roomId}`);
       return response.data;
     },
     enabled: !!roomId,

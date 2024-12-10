@@ -25,10 +25,10 @@ export const searchSongs = async (
 
     // Định dạng lại kết quả trả về từ API
     return response.data.result.map((item: Video) => ({
-      videoId: item.videoId,
+      video_id: item.video_id,
       title: item.title,
       thumbnail: item.thumbnail || "",
-      channelTitle: item.channelTitle || "Unknown Artist",
+      author: item.author || "Unknown Artist",
       duration: item.duration || 0, // Nếu API trả về thời lượng
     }));
   } catch (error) {

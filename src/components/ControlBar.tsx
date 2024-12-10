@@ -2,8 +2,15 @@ import BackwordIcon from "@/assets/icons/BackwordIcon";
 import ForwardIcon from "@/assets/icons/ForwardIcon";
 import PauseIcon from "@/assets/icons/PauseIcon";
 import PlayIcon from "@/assets/icons/PlayIcon";
-import { useQueue } from "@/contexts/QueueContext";
-import React, { useState } from "react";
+import { PlaybackState } from "@/constant/enum";
+import {
+  usePlaybackMutations,
+  usePlayNextSong,
+} from "@/hooks/useQueueMutations";
+import { useQueueQuery } from "@/hooks/useQueueQuery";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "./ToastContainer";
 
 type Props = {
   onToggleQueue: () => void;
@@ -11,13 +18,44 @@ type Props = {
 
 const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const { queue } = useQueue();
 
-  const currentSong = {
-    thumbnail: "https://via.placeholder.com/64",
-    title: "Tên bài hát",
-    artist: "Tên nghệ sĩ",
+  const [params] = useSearchParams();
+  const roomId = params.get("roomId") || "";
+
+  const { data: queueData } = useQueueQuery();
+
+  const { mutate: playback } = usePlaybackMutations();
+  const { mutate: playNextSong, isPending: isPlayingNextSong } =
+    usePlayNextSong();
+  const currentSong = queueData?.result?.nowPlaying || ({} as Video);
+  const queue = queueData?.result?.queue || [];
+
+  const handlePlayback = (action: PlaybackState) => {
+    playback(
+      { roomId: roomId, action },
+      {
+        onSuccess: (data) => {
+          setIsPlaying(data.result === PlaybackState.PLAY);
+        },
+      }
+    );
   };
+
+  console.log("currentSong :>> ", currentSong.duration);
+
+  const handlePlayNextSong = () => {
+    if (queue.length > 0) {
+      playNextSong({ roomId: roomId });
+    } else {
+      toast.error("Không có bài hát trong danh sách!");
+    }
+  };
+
+  useEffect(() => {
+    if (isPlayingNextSong) {
+      toast.warning("Chuẩn bị bài hát tiếp theo");
+    }
+  }, [isPlayingNextSong]);
 
   return (
     <>
@@ -31,21 +69,30 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
             className="w-12 h-12 object-cover rounded"
           />
           <div>
-            <p className="text-sm font-bold">{currentSong.title}</p>
-            <p className="text-xs text-gray-400">{currentSong.artist}</p>
+            <p className="text-sm font-bold line-clamp-1 max-w-[200px]">
+              {currentSong.title}
+            </p>
+            <p className="text-xs text-gray-400">{currentSong.author}</p>
           </div>
         </div>
 
         {/* Center: Controls */}
         <div className="flex flex-col items-center w-full gap-y-4">
           <div className="flex items-center space-x-6">
-            <button>
+            <button disabled={isPlayingNextSong}>
               <BackwordIcon />
             </button>
-            <button onClick={() => setIsPlaying(!isPlaying)}>
-              {isPlaying ? <PauseIcon /> : <PlayIcon />}
+            <button
+              disabled={isPlayingNextSong}
+              onClick={() =>
+                handlePlayback(
+                  isPlaying ? PlaybackState.PAUSE : PlaybackState.PLAY
+                )
+              }
+            >
+              {isPlaying ? <PlayIcon /> : <PauseIcon />}
             </button>
-            <button>
+            <button onClick={handlePlayNextSong} disabled={isPlayingNextSong}>
               <ForwardIcon />
             </button>
           </div>

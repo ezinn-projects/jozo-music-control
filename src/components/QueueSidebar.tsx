@@ -49,7 +49,7 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
                   {queueData?.result?.nowPlaying?.title}
                 </p>
                 <p className="text-sm text-gray-400 truncate">
-                  {queueData?.result?.nowPlaying?.channelTitle}
+                  {queueData?.result?.nowPlaying?.author}
                 </p>
               </div>
             </div>
@@ -81,7 +81,7 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
                   <div className="flex-1 min-w-0">
                     <p className="font-bold truncate">{song.title}</p>
                     <p className="text-sm text-gray-400 truncate">
-                      {song.channelTitle}
+                      {song.author}
                     </p>
                   </div>
                   <button

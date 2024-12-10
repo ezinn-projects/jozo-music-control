@@ -18,7 +18,7 @@ export const useQueueMutations = () => {
     }) => {
       const response = await http.post<
         ApiResponse<{ queue: Video[]; nowPlaying: Video }>
-      >(`/song-queue/${roomId}`, {
+      >(`/room-music/${roomId}`, {
         ...song,
         position,
       });
@@ -47,8 +47,7 @@ export const useQueueMutations = () => {
             ...oldData,
             result: {
               ...oldData.result,
-              queue: data.result.queue,
-              nowPlaying: data.result.nowPlaying,
+              ...data.result,
             },
           };
         }
@@ -76,7 +75,7 @@ export const useRemoveSongFromQueue = () => {
     }) => {
       const response = await http.delete<
         ApiResponse<{ queue: Video[]; nowPlaying: Video }>
-      >(`/song-queue/${roomId}/${videoIndex}`);
+      >(`/room-music/${roomId}/${videoIndex}`);
       return response.data;
     },
     onSuccess: (data, variables) => {
@@ -98,6 +97,57 @@ export const useRemoveSongFromQueue = () => {
               ...oldData.result,
               queue: data.result.queue,
               // nowPlaying: data.result.nowPlaying,
+            },
+          };
+        }
+      );
+    },
+  });
+};
+
+export const usePlaybackMutations = () => {
+  return useMutation({
+    mutationFn: async ({
+      roomId,
+      action,
+    }: {
+      roomId: string;
+      action: PlaybackState;
+    }) => {
+      const response = await http.post<ApiResponse<PlaybackState>>(
+        `/room-music/${roomId}/playback/${action}`
+      );
+
+      return response.data;
+    },
+  });
+};
+
+export const usePlayNextSong = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ roomId }: { roomId: string }) => {
+      const response = await http.post(`/room-music/${roomId}/play-next-song`);
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        ["queue", variables.roomId],
+        (
+          oldData:
+            | ApiResponse<{
+                nowPlaying: Video;
+                queue: Video[];
+              }>
+            | undefined
+        ) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            result: {
+              ...oldData.result,
+              ...data.result,
             },
           };
         }

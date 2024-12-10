@@ -5,7 +5,7 @@ const Home: React.FC = () => {
   const categories = ["Rap", "Pop", "Ballad", "Dance", "Indie"];
 
   return (
-    <div className="space-y-8">
+    <div className="p-4">
       {/* Tags Section */}
       <section>
         <h2 className="text-2xl font-bold mb-4">Nghệ sĩ & Bài hát</h2>
