@@ -35,13 +35,11 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       { roomId: roomId, action },
       {
         onSuccess: (data) => {
-          setIsPlaying(data.result === PlaybackState.PLAY);
+          setIsPlaying(data.result.action === PlaybackState.PLAY);
         },
       }
     );
   };
-
-  console.log("currentSong :>> ", currentSong.duration);
 
   const handlePlayNextSong = () => {
     if (queue.length > 0) {

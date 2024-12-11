@@ -114,7 +114,7 @@ export const usePlaybackMutations = () => {
       roomId: string;
       action: PlaybackState;
     }) => {
-      const response = await http.post<ApiResponse<PlaybackState>>(
+      const response = await http.post<ApiResponse<{ action: PlaybackState }>>(
         `/room-music/${roomId}/playback/${action}`
       );
 
