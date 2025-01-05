@@ -1,4 +1,5 @@
 import { toast } from "@/components/ToastContainer";
+import { PlaybackState } from "@/constant/enum";
 import http from "@/utils/http";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -110,12 +111,15 @@ export const usePlaybackMutations = () => {
     mutationFn: async ({
       roomId,
       action,
+      seekTime,
     }: {
       roomId: string;
       action: PlaybackState;
+      seekTime?: number;
     }) => {
       const response = await http.post<ApiResponse<{ action: PlaybackState }>>(
-        `/room-music/${roomId}/playback/${action}`
+        `/room-music/${roomId}/playback/${action}`,
+        { seekTime }
       );
 
       return response.data;

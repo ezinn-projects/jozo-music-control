@@ -3,14 +3,9 @@ import ForwardIcon from "@/assets/icons/ForwardIcon";
 import PauseIcon from "@/assets/icons/PauseIcon";
 import PlayIcon from "@/assets/icons/PlayIcon";
 import { PlaybackState } from "@/constant/enum";
-import {
-  usePlaybackMutations,
-  usePlayNextSong,
-} from "@/hooks/useQueueMutations";
-import { useQueueQuery } from "@/hooks/useQueueQuery";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { toast } from "./ToastContainer";
+import io, { Socket } from "socket.io-client";
 
 type Props = {
   onToggleQueue: () => void;
@@ -18,42 +13,112 @@ type Props = {
 
 const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const [currentTime, setCurrentTime] = useState(0); // Thời gian hiện tại
+  const [isDragging, setIsDragging] = useState(false); // Theo dõi trạng thái kéo progress bar
+  const [duration, setDuration] = useState(300); // Thời lượng video (giả định)
+  const [queue, setQueue] = useState<number[]>([]); // Giả định queue
+  const socketRef = useRef<typeof Socket | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [params] = useSearchParams();
   const roomId = params.get("roomId") || "";
 
-  const { data: queueData } = useQueueQuery();
-
-  const { mutate: playback } = usePlaybackMutations();
-  const { mutate: playNextSong, isPending: isPlayingNextSong } =
-    usePlayNextSong();
-  const currentSong = queueData?.result?.nowPlaying || ({} as Video);
-  const queue = queueData?.result?.queue || [];
-
-  const handlePlayback = (action: PlaybackState) => {
-    playback(
-      { roomId: roomId, action },
-      {
-        onSuccess: (data) => {
-          setIsPlaying(data.result.action === PlaybackState.PLAY);
-        },
-      }
-    );
-  };
-
-  const handlePlayNextSong = () => {
-    if (queue.length > 0) {
-      playNextSong({ roomId: roomId });
-    } else {
-      toast.error("Không có bài hát trong danh sách!");
-    }
-  };
-
   useEffect(() => {
-    if (isPlayingNextSong) {
-      toast.warning("Chuẩn bị bài hát tiếp theo");
+    // Khởi tạo kết nối WebSocket
+    socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
+      query: { roomId },
+    });
+
+    // Lắng nghe sự kiện từ server
+    socketRef.current.on("playback_event", (data: any) => {
+      if (data.event === "play") {
+        setIsPlaying(true);
+        setCurrentTime(data.currentTime || 0);
+        startInterval();
+      } else if (data.event === "pause") {
+        setIsPlaying(false);
+        stopInterval();
+      } else if (data.event === "seek") {
+        setCurrentTime(data.currentTime || 0);
+      }
+    });
+
+    // Lắng nghe sự kiện cập nhật queue
+    socketRef.current.on("update_queue", (data: any) => {
+      setQueue(data.queue || []);
+    });
+
+    return () => {
+      socketRef.current?.disconnect();
+      stopInterval();
+    };
+  }, [roomId]);
+
+  // Bắt đầu cập nhật thời gian mỗi giây khi video phát
+  const startInterval = () => {
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        setCurrentTime((prev) => (prev < duration ? prev + 1 : prev));
+      }, 1000);
     }
-  }, [isPlayingNextSong]);
+  };
+
+  // Dừng cập nhật thời gian
+  const stopInterval = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  // Gửi sự kiện playback tới server
+  const sendPlaybackEvent = (action: PlaybackState, time?: number) => {
+    if (socketRef.current) {
+      socketRef.current.emit("playback_event", {
+        roomId,
+        event: action,
+        currentTime: time || currentTime,
+      });
+    }
+  };
+
+  // Xử lý Play/Pause
+  const handlePlayback = () => {
+    const action = isPlaying ? PlaybackState.PAUSE : PlaybackState.PLAY;
+    setIsPlaying(!isPlaying);
+    sendPlaybackEvent(action);
+    if (action === PlaybackState.PLAY) {
+      startInterval();
+    } else {
+      stopInterval();
+    }
+  };
+
+  // Xử lý tua thời gian
+  const handleSeek = (time: number) => {
+    setCurrentTime(time);
+    setIsDragging(false);
+    sendPlaybackEvent(PlaybackState.SEEK, time);
+  };
+
+  // Bắt đầu kéo progress bar
+  const handleDragStart = () => {
+    setIsDragging(true);
+    stopInterval();
+  };
+
+  // Khi đang kéo progress bar
+  const handleDrag = (value: number) => {
+    if (isDragging) {
+      setCurrentTime(value);
+    }
+  };
+
+  // Định dạng thời gian
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
 
   return (
     <>
@@ -62,45 +127,57 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         {/* Left: Song Info */}
         <div className="flex items-center space-x-4 flex-shrink-0">
           <img
-            src={currentSong.thumbnail}
-            alt={currentSong.title}
+            src="/placeholder.jpg"
+            alt="Current Song"
             className="w-12 h-12 object-cover rounded"
           />
           <div>
             <p className="text-sm font-bold line-clamp-1 max-w-[200px]">
-              {currentSong.title}
+              Bài hát hiện tại
             </p>
-            <p className="text-xs text-gray-400">{currentSong.author}</p>
+            <p className="text-xs text-gray-400">Ca sĩ</p>
           </div>
         </div>
 
         {/* Center: Controls */}
         <div className="flex flex-col items-center w-full gap-y-4">
           <div className="flex items-center space-x-6">
-            <button disabled={isPlayingNextSong}>
+            <button disabled={queue.length === 0}>
               <BackwordIcon />
             </button>
-            <button
-              disabled={isPlayingNextSong}
-              onClick={() =>
-                handlePlayback(
-                  isPlaying ? PlaybackState.PAUSE : PlaybackState.PLAY
-                )
-              }
-            >
-              {isPlaying ? <PlayIcon /> : <PauseIcon />}
+            <button onClick={handlePlayback}>
+              {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
-            <button onClick={handlePlayNextSong} disabled={isPlayingNextSong}>
+            <button disabled={queue.length === 0}>
               <ForwardIcon />
             </button>
           </div>
           {/* Progress Bar */}
           <div className="w-full flex items-center space-x-2 text-xs text-gray-400">
-            <span>0:00</span>
-            <div className="flex-1 bg-gray-700 h-2 rounded overflow-hidden">
-              <div className="bg-blue-500 h-2" style={{ width: "30%" }}></div>
+            <span>{formatTime(currentTime)}</span>
+            <div className="relative flex-1">
+              {/* Thanh nền */}
+              <div className="absolute top-1/2 left-0 h-2 w-full bg-gray-700 rounded-full -translate-y-1/2"></div>
+              {/* Input range */}
+              <input
+                type="range"
+                min={0}
+                max={duration}
+                value={currentTime}
+                onMouseDown={handleDragStart}
+                onMouseUp={(e) => handleSeek(Number(e.currentTarget.value))}
+                onChange={(e) => handleDrag(Number(e.target.value))}
+                className="absolute z-20 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2"
+              />
+              {/* Thanh progress */}
+              <div
+                className="absolute z-10 top-1/2 left-0 h-2 bg-blue-500 rounded-full -translate-y-1/2"
+                style={{
+                  width: `${(currentTime / duration) * 100}%`,
+                }}
+              ></div>
             </div>
-            <span>3:45</span>
+            <span>{formatTime(duration)}</span>
           </div>
         </div>
 

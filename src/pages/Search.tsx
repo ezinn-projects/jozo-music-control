@@ -26,10 +26,8 @@ const SearchPage: React.FC = () => {
       searchSongs(karaoke ? `karaoke ${debouncedQuery}` : debouncedQuery),
     enabled: !!debouncedQuery && !!roomId,
     staleTime: 1000 * 60 * 5, // Cache 5 phút
-    retry: 3,
+    // retry: 3,
   });
-
-  console.log("results :>> ", results);
 
   return (
     <div className="p-4 space-y-6">

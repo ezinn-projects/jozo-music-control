@@ -55,4 +55,4 @@ interface YouTubeThumbnail {
   height: number;
 }
 
-type PlaybackState = "play" | "pause";
+// type PlaybackState = "play" | "pause";
