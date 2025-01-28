@@ -54,7 +54,7 @@ export const useQueueMutations = () => {
         }
       );
     },
-    onError: (error: AxiosError, variables) => {
+    onError: (_: AxiosError, variables) => {
       toast.error(
         `Không thể thêm bài hát "${variables.song.title}" vào danh sách.`
       );

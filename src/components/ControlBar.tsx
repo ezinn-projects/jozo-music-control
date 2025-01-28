@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import BackwordIcon from "@/assets/icons/BackwordIcon";
 import ForwardIcon from "@/assets/icons/ForwardIcon";
 import PauseIcon from "@/assets/icons/PauseIcon";
@@ -34,6 +35,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         setIsPlaying(true);
         setCurrentTime(data.currentTime || 0);
         startInterval();
+        setDuration(0);
       } else if (data.event === "pause") {
         setIsPlaying(false);
         stopInterval();
