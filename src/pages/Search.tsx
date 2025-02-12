@@ -10,7 +10,7 @@ const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("query") || "";
   const karaoke = searchParams.get("karaoke") === "true";
-  const roomId = searchParams.get("roomId");
+  const roomId = searchParams.get("roomId") || "";
 
   // Debounced query
   const debouncedQuery = useDebounce(query, 1900);
@@ -23,7 +23,10 @@ const SearchPage: React.FC = () => {
   } = useQuery({
     queryKey: ["searchResults", debouncedQuery, karaoke],
     queryFn: () =>
-      searchSongs(karaoke ? `karaoke ${debouncedQuery}` : debouncedQuery),
+      searchSongs(
+        karaoke ? `karaoke ${debouncedQuery}` : debouncedQuery,
+        roomId || ""
+      ),
     enabled: !!debouncedQuery && !!roomId,
     staleTime: 1000 * 60 * 5, // Cache 5 phút
     // retry: 3,

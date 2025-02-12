@@ -8,13 +8,14 @@ import axiosInstance from "@/utils/http";
  */
 export const searchSongs = async (
   query: string,
+  roomId: string,
   limit: number = 50
 ): Promise<Video[]> => {
   if (!query) return [];
 
   try {
     const response = await axiosInstance.get<ApiResponse<Video[]>>(
-      "/rooms/search-songs",
+      `/room-music/${roomId}/search-songs`,
       {
         params: {
           q: query, // Từ khóa tìm kiếm

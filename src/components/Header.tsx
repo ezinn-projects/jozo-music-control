@@ -51,12 +51,19 @@ const Header: React.FC = () => {
   return (
     <header className="bg-gray-900 text-white p-4 flex items-center justify-between shadow-md z-50">
       {/* Logo */}
-      <div
+      {/* <div
         className="text-2xl font-bold cursor-pointer"
         onClick={() => navigate(`/?roomId=${roomId}&karaoke=${isKaraoke}`)}
       >
-        Jozo Karaoke
-      </div>
+        Jozo
+      </div> */}
+      {/* thay thế bằng logo */}
+      <img
+        src="@/assets/images/Screenshot_11-removebg-preview.png"
+        alt="Jozo"
+        className="w-10 h-10 cursor-pointer"
+        onClick={() => navigate(`/?roomId=${roomId}&karaoke=${isKaraoke}`)}
+      />
 
       {/* Search Input */}
       <div className="w-1/2 flex items-center gap-x-4">
