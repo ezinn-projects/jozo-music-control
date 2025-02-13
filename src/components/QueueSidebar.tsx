@@ -17,8 +17,6 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
   const [searchParams] = useSearchParams();
   const roomId = searchParams.get("roomId") || "";
 
-  console.log("queueData", queueData?.result.queue);
-
   return (
     <div
       className={`w-full bg-transparent text-white transition-all duration-200 z-40 shadow-md ${

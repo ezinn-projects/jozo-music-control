@@ -1,6 +1,7 @@
-import React, { useState } from "react";
 import Modal from "@/components/Modal";
 import { useQueueMutations } from "@/hooks/useQueueMutations"; // Đường dẫn file hook
+import React, { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 interface SongCardProps {
   video_id: string;
@@ -19,8 +20,8 @@ const SongCard: React.FC<SongCardProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { addSongToQueue } = useQueueMutations();
-
-  const roomId = "1"; // Lấy roomId từ context hoặc prop
+  const [searchParams] = useSearchParams();
+  const roomId = searchParams.get("roomId") || "";
 
   const handleAddToTop = () => {
     addSongToQueue.mutate({

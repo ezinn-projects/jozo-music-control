@@ -4,6 +4,7 @@ import ForwardIcon from "@/assets/icons/ForwardIcon";
 import PauseIcon from "@/assets/icons/PauseIcon";
 import PlayIcon from "@/assets/icons/PlayIcon";
 import { PlaybackState } from "@/constant/enum";
+import { useQueueQuery } from "@/hooks/useQueueQuery";
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import io, { Socket } from "socket.io-client";
@@ -16,12 +17,18 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0); // Thời gian hiện tại
   const [isDragging, setIsDragging] = useState(false); // Theo dõi trạng thái kéo progress bar
-  const [duration, setDuration] = useState(300); // Thời lượng video (giả định)
+  // const [duration, setDuration] = useState(300); // Thời lượng video (giả định)
   const [queue, setQueue] = useState<number[]>([]); // Giả định queue
   const socketRef = useRef<typeof Socket | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [params] = useSearchParams();
   const roomId = params.get("roomId") || "";
+
+  const { data: queueData } = useQueueQuery();
+
+  console.log("queueData", queueData?.result.nowPlaying);
+
+  const duration = queueData?.result.nowPlaying?.duration || 0;
 
   useEffect(() => {
     // Khởi tạo kết nối WebSocket
@@ -35,7 +42,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         setIsPlaying(true);
         setCurrentTime(data.currentTime || 0);
         startInterval();
-        setDuration(0);
+        // setDuration(0);
       } else if (data.event === "pause") {
         setIsPlaying(false);
         stopInterval();
@@ -125,7 +132,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   return (
     <>
       {/* Control Bar */}
-      <div className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow-lg gap-x-6 rounded-3xl z-30">
+      <div className="bg-black text-white px-6 py-3 flex items-center justify-between shadow-lg gap-x-6 rounded-3xl z-30">
         {/* Left: Song Info */}
         <div className="flex items-center space-x-4 flex-shrink-0">
           <img
@@ -159,7 +166,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
             <span>{formatTime(currentTime)}</span>
             <div className="relative flex-1">
               {/* Thanh nền */}
-              <div className="absolute top-1/2 left-0 h-2 w-full bg-gray-700 rounded-full -translate-y-1/2"></div>
+              <div className="absolute top-1/2 left-0 h-2 w-full bg-secondary rounded-full -translate-y-1/2"></div>
               {/* Input range */}
               <input
                 type="range"
@@ -173,7 +180,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
               />
               {/* Thanh progress */}
               <div
-                className="absolute z-10 top-1/2 left-0 h-2 bg-blue-500 rounded-full -translate-y-1/2"
+                className="absolute z-10 top-1/2 left-0 h-2 bg-lightpink rounded-full -translate-y-1/2"
                 style={{
                   width: `${(currentTime / duration) * 100}%`,
                 }}
@@ -193,11 +200,12 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
             >
               🎵
             </button>
-            {queue.length > 0 && (
-              <span className="absolute -top-1 -right-2 bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                {queue.length}
-              </span>
-            )}
+            {queueData?.result?.queue?.length &&
+              queueData?.result?.queue?.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-lightpink text-white text-xs font-bold px-1.5 py-1 rounded-full">
+                  {queueData?.result?.queue?.length}
+                </span>
+              )}
           </div>
 
           {/* Volume Control */}

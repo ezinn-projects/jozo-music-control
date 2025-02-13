@@ -49,7 +49,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-gray-900 text-white p-4 flex items-center justify-between shadow-md z-50">
+    <header className="bg-black text-white p-4 flex items-center justify-between shadow-md z-50">
       {/* Logo */}
       {/* <div
         className="text-2xl font-bold cursor-pointer"
@@ -72,7 +72,7 @@ const Header: React.FC = () => {
           placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
           value={searchTerm}
           onChange={handleInputChange}
-          className="w-full p-3 bg-gray-800 text-white rounded-lg shadow-md focus:outline-none"
+          className="w-full p-3 bg-secondary text-white rounded-lg shadow-md focus:outline-none"
           onClick={handleInputClick}
         />
         <div className="flex items-center gap-x-2">

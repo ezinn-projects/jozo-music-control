@@ -8,16 +8,16 @@ const Layout: React.FC = () => {
   const [isQueueOpen, setIsQueueOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-screen bg-black text-white">
       {/* Header */}
       <Header />
 
       {/* Queue Sidebar */}
 
       {/* Main */}
-      <main className="flex-1 relative overflow-hidden rounded-3xl bg-gray-800">
+      <main className="flex-1 relative overflow-hidden rounded-3xl bg-secondary">
         {/* Blur Effect */}
-        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-white/10 to-transparent z-10 pointer-events-none animate-breathing"></div>
+        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-lightpink/10 to-transparent z-10 pointer-events-none animate-breathing"></div>
 
         {/* Outlet Content */}
         <div className="relative z-20 h-full grid grid-cols-12">
