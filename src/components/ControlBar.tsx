@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import BackwordIcon from "@/assets/icons/BackwordIcon";
 import ForwardIcon from "@/assets/icons/ForwardIcon";
 import PauseIcon from "@/assets/icons/PauseIcon";
 import PlayIcon from "@/assets/icons/PlayIcon";
 import { PlaybackState } from "@/constant/enum";
+import { usePlayNextSong } from "@/hooks/useQueueMutations";
 import { useQueueQuery } from "@/hooks/useQueueQuery";
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -17,8 +17,6 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0); // Thời gian hiện tại
   const [isDragging, setIsDragging] = useState(false); // Theo dõi trạng thái kéo progress bar
-  // const [duration, setDuration] = useState(300); // Thời lượng video (giả định)
-  const [queue, setQueue] = useState<number[]>([]); // Giả định queue
   const socketRef = useRef<typeof Socket | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [params] = useSearchParams();
@@ -26,7 +24,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
 
   const { data: queueData } = useQueueQuery();
 
-  console.log("queueData", queueData?.result.nowPlaying);
+  const { mutate: playNextSong } = usePlayNextSong();
 
   const duration = queueData?.result.nowPlaying?.duration || 0;
 
@@ -42,7 +40,6 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         setIsPlaying(true);
         setCurrentTime(data.currentTime || 0);
         startInterval();
-        // setDuration(0);
       } else if (data.event === "pause") {
         setIsPlaying(false);
         stopInterval();
@@ -51,16 +48,41 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       }
     });
 
-    // Lắng nghe sự kiện cập nhật queue
-    socketRef.current.on("update_queue", (data: any) => {
-      setQueue(data.queue || []);
+    // Lắng nghe sự kiện next_song
+    socketRef.current.on("next_song", () => {
+      socketRef.current?.emit("get_now_playing", { roomId });
     });
+
+    socketRef.current.on("now_playing", (data: any) => {
+      if (data) {
+        setCurrentTime(data.currentTime || 0);
+        setIsPlaying(data.isPlaying || false);
+        if (data.isPlaying) {
+          startInterval();
+        }
+
+        // Tính toán thời gian chính xác dựa trên timestamp
+        const currentServerTime =
+          data.timestamp + (Date.now() - data.timestamp) / 1000;
+        const targetTime =
+          data.currentTime + (currentServerTime - data.timestamp);
+        setCurrentTime(targetTime);
+      }
+    });
+
+    // Lấy thông tin bài hát hiện tại khi component mount
+    socketRef.current.emit("get_now_playing", { roomId });
+
+    // Lắng nghe sự kiện cập nhật queue
+    // socketRef.current.on("update_queue", (data: any) => {
+    //   // setQueue(data.queue || []);
+    // });
 
     return () => {
       socketRef.current?.disconnect();
       stopInterval();
     };
-  }, [roomId]);
+  }, [roomId]); // Chỉ chạy khi roomId thay đổi
 
   // Bắt đầu cập nhật thời gian mỗi giây khi video phát
   const startInterval = () => {
@@ -129,6 +151,8 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  console.log("currentTime", currentTime);
+
   return (
     <>
       {/* Control Bar */}
@@ -136,28 +160,46 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         {/* Left: Song Info */}
         <div className="flex items-center space-x-4 flex-shrink-0">
           <img
-            src="/placeholder.jpg"
+            src={queueData?.result.nowPlaying?.thumbnail}
             alt="Current Song"
             className="w-12 h-12 object-cover rounded"
           />
           <div>
-            <p className="text-sm font-bold line-clamp-1 max-w-[200px]">
-              Bài hát hiện tại
+            <div className="w-[200px] overflow-hidden">
+              <p className="text-sm font-bold whitespace-nowrap animate-marquee">
+                {queueData?.result.nowPlaying?.title}
+              </p>
+            </div>
+            <p className="text-xs text-gray-400">
+              {queueData?.result.nowPlaying?.author}
             </p>
-            <p className="text-xs text-gray-400">Ca sĩ</p>
           </div>
         </div>
 
         {/* Center: Controls */}
         <div className="flex flex-col items-center w-full gap-y-4">
           <div className="flex items-center space-x-6">
-            <button disabled={queue.length === 0}>
+            {/* <button disabled={queue.length === 0}>
               <BackwordIcon />
-            </button>
+            </button> */}
             <button onClick={handlePlayback}>
               {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
-            <button disabled={queue.length === 0}>
+            <button
+              onClick={() => {
+                playNextSong(
+                  { roomId },
+                  {
+                    onSuccess: () => {
+                      // Emit sự kiện next_song để thông báo cho tất cả clients
+                      socketRef.current?.emit("next_song", { roomId });
+                      // Sau đó lấy thông tin bài hát mới
+                      socketRef.current?.emit("get_now_playing", { roomId });
+                    },
+                  }
+                );
+              }}
+            >
               <ForwardIcon />
             </button>
           </div>
@@ -184,7 +226,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
                 style={{
                   width: `${(currentTime / duration) * 100}%`,
                 }}
-              ></div>
+              />
             </div>
             <span>{formatTime(duration)}</span>
           </div>
@@ -200,9 +242,9 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
             >
               🎵
             </button>
-            {queueData?.result?.queue?.length &&
+            {!!queueData?.result?.queue?.length &&
               queueData?.result?.queue?.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-lightpink text-white text-xs font-bold px-1.5 py-1 rounded-full">
+                <span className="absolute -top-3 -right-3 bg-lightpink text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
                   {queueData?.result?.queue?.length}
                 </span>
               )}

@@ -41,22 +41,25 @@ jobs:
   # Job 2: Deploy to Staging or Production
   deploy:
     runs-on: ubuntu-latest
-    needs: build # Chạy job deploy chỉ khi job build thành công
+    needs: build
 
     steps:
-      # 1. Log in to Docker Hub (optional, nếu cần xác thực lại)
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      # 1. Kết nối SSH đến VPS
+      - name: Connect to VPS via SSH
+        uses: appleboy/ssh-action@master
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Login to Docker Hub
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      # 2. Deploy Docker container
-      - name: Deploy Docker container
-        if: github.ref_name == 'main' || github.ref_name == 'develop'
-        run: |
-          docker stop jozo-music-control || true && docker rm jozo-music-control || true
-          docker run -d \
-            --name jozo-music-control \
-            -p 5000:3000 \
-            ${{ secrets.DOCKER_USERNAME }}/jozo-music-control:${{ github.ref_name }}
+            # Pull và chạy container mới
+            docker pull ${{ secrets.DOCKER_USERNAME }}/jozo-music-control:${{ github.ref_name }}
+            docker stop jozo-music-control || true
+            docker rm jozo-music-control || true
+            docker run -d \
+              --name jozo-music-control \
+              -p 5000:3000 \
+              ${{ secrets.DOCKER_USERNAME }}/jozo-music-control:${{ github.ref_name }}
