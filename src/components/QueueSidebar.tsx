@@ -3,11 +3,75 @@ import { useRemoveSongFromQueue } from "@/hooks/useQueueMutations";
 import { useQueueQuery } from "@/hooks/useQueueQuery";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface QueueSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+interface Song {
+  title: string;
+  author: string;
+  thumbnail: string;
+  video_id: string;
+}
+
+const SortableQueueItem = ({
+  song,
+  idx,
+  onRemove,
+}: {
+  song: Song;
+  idx: number;
+  onRemove: (idx: number) => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: `${idx}-${song.title}`,
+    });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="flex items-center space-x-4 mb-4 cursor-grab active:cursor-grabbing"
+    >
+      <div {...listeners} className="flex items-center space-x-4 w-full">
+        <img
+          src={song.thumbnail}
+          alt={song.title}
+          className="w-12 h-12 object-cover rounded-lg"
+        />
+        <div className="flex justify-between items-center w-full max-w-[calc(100%-56px)]">
+          <div className="flex-1 min-w-0">
+            <p className="font-bold truncate">{song.title}</p>
+            <p className="text-sm text-gray-400 truncate">{song.author}</p>
+          </div>
+          <button
+            className="p-2 text-gray-400 hover:text-white transition-colors"
+            onClick={() => onRemove(idx)}
+          >
+            <RemoveIcon />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
   const { data: queueData } = useQueueQuery();
@@ -16,6 +80,28 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
 
   const [searchParams] = useSearchParams();
   const roomId = searchParams.get("roomId") || "";
+
+  const [items, setItems] = React.useState(queueData?.result?.queue || []);
+
+  React.useEffect(() => {
+    setItems(queueData?.result?.queue || []);
+  }, [queueData?.result?.queue]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = items.findIndex(
+        (item, idx) => `${idx}-${item.title}` === active.id
+      );
+      const newIndex = items.findIndex(
+        (item, idx) => `${idx}-${item.title}` === over.id
+      );
+
+      setItems(arrayMove(items, oldIndex, newIndex));
+      // Ở đây bạn có thể thêm API call để cập nhật thứ tự trên server
+    }
+  };
 
   return (
     <div
@@ -68,34 +154,29 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
                 </button>
               )}
             </div>
-            {queueData?.result?.queue?.map((song, idx) => (
-              <div key={idx} className="flex items-center space-x-4 mb-4">
-                <img
-                  src={song.thumbnail}
-                  alt={song.title}
-                  className="w-12 h-12 object-cover rounded-lg"
-                />
-                <div className="flex justify-between items-center w-full max-w-[calc(100%-56px)]">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold truncate">{song.title}</p>
-                    <p className="text-sm text-gray-400 truncate">
-                      {song.author}
-                    </p>
-                  </div>
-                  <button
-                    className="p-2 text-gray-400 hover:text-white transition-colors"
-                    onClick={() => {
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={items.map((song, idx) => `${idx}-${song.title}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                {items.map((song, idx) => (
+                  <SortableQueueItem
+                    key={`${idx}-${song.title}`}
+                    song={song}
+                    idx={idx}
+                    onRemove={(idx) => {
                       removeSongFromQueue({
                         videoIndex: idx,
                         roomId: roomId,
                       });
                     }}
-                  >
-                    <RemoveIcon />
-                  </button>
-                </div>
-              </div>
-            ))}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
           </div>
         </div>
       </div>
