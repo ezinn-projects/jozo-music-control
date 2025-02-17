@@ -61,5 +61,5 @@ jobs:
             docker rm jozo-music-control || true
             docker run -d \
               --name jozo-music-control \
-              -p 5000:3000 \
+              -p 3000:3000 \
               ${{ secrets.DOCKER_USERNAME }}/jozo-music-control:${{ github.ref_name }}
