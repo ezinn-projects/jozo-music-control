@@ -3,6 +3,7 @@ import HomeIcon from "@/assets/icons/HomeIcon";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Switch from "./Switch";
+import { logo } from "@/assets/images";
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -59,7 +60,7 @@ const Header: React.FC = () => {
       </div> */}
       {/* thay thế bằng logo */}
       <img
-        src="@/assets/images/Screenshot_11-removebg-preview.png"
+        src={logo}
         alt="Jozo"
         className="w-10 h-10 cursor-pointer"
         onClick={() => navigate(`/?roomId=${roomId}&karaoke=${isKaraoke}`)}
@@ -76,7 +77,7 @@ const Header: React.FC = () => {
           onClick={handleInputClick}
         />
         <div className="flex items-center gap-x-2">
-          <span className="text-sm">Karaoke</span>
+          <span className="text-sm whitespace-nowrap">Lời nhạc</span>
           <Switch
             isChecked={isKaraoke}
             onChange={() => {

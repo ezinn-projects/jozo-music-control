@@ -24,7 +24,7 @@ const SearchPage: React.FC = () => {
     queryKey: ["searchResults", debouncedQuery, karaoke],
     queryFn: () =>
       searchSongs(
-        karaoke ? `karaoke ${debouncedQuery}` : debouncedQuery,
+        karaoke ? `karaoke beat ${debouncedQuery}` : debouncedQuery,
         roomId || ""
       ),
     enabled: !!debouncedQuery && !!roomId,
