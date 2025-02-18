@@ -1,26 +1,20 @@
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import SongCard from "@/components/SongCard";
+import { searchSongs } from "@/services/searchService";
 
 const Home: React.FC = () => {
-  const tags = ["Sơn Tùng MTP", "BlackPink", "Taylor Swift", "Lê Bảo Bình"];
   const categories = ["Rap", "Pop", "Ballad", "Dance", "Indie"];
 
-  return (
-    <div className="p-4">
-      {/* Tags Section */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">Nghệ sĩ & Bài hát</h2>
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag, index) => (
-            <button
-              key={index}
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300"
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      </section>
+  // Query để lấy trending videos
+  const { data: trendingVideos = [], isLoading } = useQuery({
+    queryKey: ["trendingVideos1"],
+    queryFn: () => searchSongs("karaoke thịnh hành", ""),
+    staleTime: 1000 * 60 * 30, // Cache 30 phút
+  });
 
+  return (
+    <div className="p-4 space-y-8">
       {/* Categories Section */}
       <section>
         <h2 className="text-2xl font-bold mb-4">Thể loại âm nhạc</h2>
@@ -32,6 +26,17 @@ const Home: React.FC = () => {
             >
               {category}
             </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Trending Videos Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4">Bài Hát Đang Hot</h2>
+        {isLoading && <p className="text-gray-500">Đang tải...</p>}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {trendingVideos?.map((video: Video) => (
+            <SongCard key={video.video_id} {...video} />
           ))}
         </div>
       </section>

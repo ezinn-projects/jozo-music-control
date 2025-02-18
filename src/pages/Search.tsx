@@ -22,15 +22,24 @@ const SearchPage: React.FC = () => {
     isError,
   } = useQuery({
     queryKey: ["searchResults", debouncedQuery, karaoke],
-    queryFn: () =>
-      searchSongs(
-        karaoke ? `karaoke beat ${debouncedQuery}` : debouncedQuery,
-        roomId || ""
-      ),
+    queryFn: () => {
+      const isEnglishQuery = /^[a-zA-Z\s]+$/.test(debouncedQuery.trim());
+
+      const musicKeywords = karaoke
+        ? `karaoke beat ${debouncedQuery}`
+        : isEnglishQuery
+        ? `${debouncedQuery} beat music song karaoke`
+        : `${debouncedQuery} nhạc beat`;
+
+      return searchSongs(musicKeywords, roomId || "");
+    },
+    select: (data) => data.filter((video) => video.author !== "Sing King"),
     enabled: !!debouncedQuery && !!roomId,
     staleTime: 1000 * 60 * 5, // Cache 5 phút
     // retry: 3,
   });
+
+  console.log("results", results);
 
   return (
     <div className="p-4 space-y-6">

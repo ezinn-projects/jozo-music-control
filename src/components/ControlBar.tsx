@@ -225,80 +225,95 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  const nowPlaying = queueData?.result.nowPlaying?.video_id;
+
   return (
     <>
       {/* Control Bar */}
       <div className="bg-black text-white px-6 py-3 flex items-center justify-between shadow-lg gap-x-6 rounded-3xl z-30">
         {/* Left: Song Info */}
         <div className="flex items-center space-x-4 flex-shrink-0">
-          <img
-            src={queueData?.result.nowPlaying?.thumbnail}
-            alt="Current Song"
-            className="w-12 h-12 object-cover rounded"
-          />
-          <div>
-            <div className="w-[200px] overflow-hidden">
-              <p className="text-sm font-bold whitespace-nowrap animate-marquee">
-                {queueData?.result.nowPlaying?.title}
-              </p>
+          {nowPlaying ? (
+            <>
+              <img
+                src={queueData.result.nowPlaying.thumbnail}
+                alt="Current Song"
+                className="w-12 h-12 object-cover rounded"
+              />
+              <div>
+                <div className="w-[200px] overflow-hidden">
+                  <p className="text-sm font-bold whitespace-nowrap animate-marquee">
+                    {queueData.result.nowPlaying.title}
+                  </p>
+                </div>
+                <p className="text-xs text-gray-400">
+                  {queueData.result.nowPlaying.author}
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="text-gray-400">
+              Hãy tìm kiếm và thêm bài hát vào danh sách phát
             </div>
-            <p className="text-xs text-gray-400">
-              {queueData?.result.nowPlaying?.author}
-            </p>
-          </div>
+          )}
         </div>
 
         {/* Center: Controls */}
-        <div className="flex flex-col items-center w-full gap-y-4">
-          <div className="flex items-center space-x-6">
-            <button onClick={handlePlayback}>
-              {isPlaying ? <PlayIcon /> : <PauseIcon />}
-            </button>
-            <button
-              onClick={() => {
-                playNextSong(
-                  { roomId },
-                  {
-                    onSuccess: () => {
-                      socketRef.current?.emit("next_song", { roomId });
-                      socketRef.current?.emit("get_now_playing", { roomId });
-                      setIsPlaying(true);
-                    },
-                  }
-                );
-              }}
-            >
-              <ForwardIcon />
-            </button>
-          </div>
-          {/* Progress Bar */}
-          <div className="w-full flex items-center space-x-2 text-xs text-gray-400">
-            <span>{formatTime(currentTime)}</span>
-            <div className="relative flex-1">
-              {/* Thanh nền */}
-              <div className="absolute top-1/2 left-0 h-2 w-full bg-secondary rounded-full -translate-y-1/2"></div>
-              {/* Input range */}
-              <input
-                type="range"
-                min={0}
-                max={duration}
-                value={currentTime}
-                onMouseDown={handleDragStart}
-                onMouseUp={(e) => handleSeek(Number(e.currentTarget.value))}
-                onChange={(e) => handleDrag(Number(e.target.value))}
-                className="absolute z-20 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2"
-              />
-              {/* Thanh progress */}
-              <div
-                className="absolute z-10 top-1/2 left-0 h-2 bg-lightpink rounded-full -translate-y-1/2"
-                style={{
-                  width: `${(currentTime / duration) * 100}%`,
+        {nowPlaying && (
+          <div className="flex flex-col items-center w-full gap-y-4">
+            <div className="flex items-center space-x-6">
+              <button onClick={handlePlayback}>
+                {isPlaying ? <PlayIcon /> : <PauseIcon />}
+              </button>
+              <button
+                onClick={() => {
+                  playNextSong(
+                    { roomId },
+                    {
+                      onSuccess: () => {
+                        socketRef.current?.emit("next_song", { roomId });
+                        socketRef.current?.emit("get_now_playing", { roomId });
+                        setIsPlaying(true);
+                      },
+                    }
+                  );
                 }}
-              />
+              >
+                <ForwardIcon />
+              </button>
             </div>
-            <span>{formatTime(duration)}</span>
+            {/* Progress Bar */}
+            <div className="w-full flex items-center space-x-2 text-xs text-gray-400">
+              <span>{formatTime(currentTime)}</span>
+              <div className="relative flex-1">
+                {/* Thanh nền */}
+                <div className="absolute top-1/2 left-0 h-2 w-full bg-secondary rounded-full -translate-y-1/2"></div>
+                {/* Input range */}
+                <input
+                  type="range"
+                  min={0}
+                  max={duration}
+                  value={currentTime}
+                  onMouseDown={handleDragStart}
+                  onMouseUp={(e) => handleSeek(Number(e.currentTarget.value))}
+                  onChange={(e) => handleDrag(Number(e.target.value))}
+                  className="absolute z-20 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2 
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-lightpink [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full
+                  [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-lightpink [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full
+                  [&::-ms-thumb]:appearance-none [&::-ms-thumb]:bg-lightpink [&::-ms-thumb]:w-4 [&::-ms-thumb]:h-4 [&::-ms-thumb]:rounded-full"
+                />
+                {/* Thanh progress */}
+                <div
+                  className="absolute z-10 top-1/2 left-0 h-2 bg-lightpink rounded-full -translate-y-1/2"
+                  style={{
+                    width: `${(currentTime / duration) * 100}%`,
+                  }}
+                />
+              </div>
+              <span>{formatTime(duration)}</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Right: Queue and Volume */}
         <div className="flex items-center space-x-6">
@@ -318,17 +333,19 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
               )}
           </div>
 
-          {/* Volume Control */}
-          <div className="flex items-center space-x-2">
-            <span className="text-lg">🔊</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              defaultValue="50"
-              className="w-24"
-            />
-          </div>
+          {/* Volume Control - Only show when there's a song playing */}
+          {nowPlaying && (
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">🔊</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                defaultValue="50"
+                className="w-24"
+              />
+            </div>
+          )}
         </div>
       </div>
     </>
