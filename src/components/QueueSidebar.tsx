@@ -11,6 +11,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import DragHandleIcon from "@/assets/icons/DragHandleIcon";
+// import DragHandleIcon from "@/assets/icons/DragHandleIcon";
 
 interface QueueSidebarProps {
   isOpen: boolean;
@@ -41,6 +43,7 @@ const SortableQueueItem = ({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    touchAction: "none",
   };
 
   return (
@@ -48,9 +51,15 @@ const SortableQueueItem = ({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="flex items-center space-x-4 mb-4 cursor-grab active:cursor-grabbing"
+      className="flex items-center space-x-4 mb-4"
     >
-      <div {...listeners} className="flex items-center space-x-4 w-full">
+      <div className="flex items-center space-x-4 w-full">
+        <div
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-white"
+        >
+          <DragHandleIcon />
+        </div>
         <img
           src={song.thumbnail}
           alt={song.title}
@@ -90,7 +99,9 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
+    if (!active || !over) return;
+
+    if (active.id !== over.id) {
       const oldIndex = items.findIndex(
         (item, idx) => `${idx}-${item.title}` === active.id
       );
@@ -98,8 +109,10 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
         (item, idx) => `${idx}-${item.title}` === over.id
       );
 
-      setItems(arrayMove(items, oldIndex, newIndex));
-      // Ở đây bạn có thể thêm API call để cập nhật thứ tự trên server
+      if (oldIndex !== -1 && newIndex !== -1) {
+        setItems(arrayMove(items, oldIndex, newIndex));
+        // TODO: Gọi API để cập nhật thứ tự trên server
+      }
     }
   };
 
@@ -140,8 +153,11 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
           </div>
         )}
 
-        {/* Waiting Queue */}
-        <div className="overflow-y-auto h-[600px]">
+        {/* Waiting Queue - phần scroll */}
+        <div
+          className="overflow-y-auto"
+          style={{ height: "calc(100vh - 350px)" }}
+        >
           <div className="p-4">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-sm font-semibold text-gray-400">

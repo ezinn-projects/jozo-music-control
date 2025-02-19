@@ -51,9 +51,20 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
           event: PlaybackState.PAUSE,
           currentTime: duration,
         });
+        // Gọi playNextSong ngay lập tức thay vì đợi setTimeout
+        playNextSong(
+          { roomId },
+          {
+            onSuccess: () => {
+              socketRef.current?.emit("next_song", { roomId });
+              socketRef.current?.emit("get_now_playing", { roomId });
+              setIsPlaying(true);
+            },
+          }
+        );
       }
     }
-  }, [isPlaying, isDragging, duration, roomId, queueData]);
+  }, [isPlaying, isDragging, duration, roomId, queueData, playNextSong]);
 
   useEffect(() => {
     if (isPlaying && !isDragging) {

@@ -27,7 +27,7 @@ const Modal: React.FC<ModalProps> = ({
         <div className="flex items-center justify-center space-x-4">
           <button
             onClick={onAddToTop}
-            className="bg-gray-900 text-white py-2 w-full px-4 rounded-lg hover:bg-gray-800 flex flex-col items-center gap-y-2"
+            className="bg-lightpink text-gray-900 py-2 w-full px-4 rounded-lg hover:bg-opacity-80 flex flex-col items-center gap-y-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -47,7 +47,7 @@ const Modal: React.FC<ModalProps> = ({
           </button>
           <button
             onClick={onAddToEnd}
-            className="bg-gray-900 text-white  w-full py-2 px-4 rounded-lg hover:bg-gray-800 flex flex-col items-center gap-y-2"
+            className="bg-lightpink text-gray-900 w-full py-2 px-4 rounded-lg hover:bg-opacity-80 flex flex-col items-center gap-y-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +69,7 @@ const Modal: React.FC<ModalProps> = ({
 
         <button
           onClick={onClose}
-          className="w-full mt-4 py-2 px-4 rounded-lg text-black flex items-center gap-x-2 justify-center"
+          className="w-full mt-4 py-2 px-4 rounded-lg text-gray-900 hover:bg-lightpink hover:bg-opacity-20 flex items-center gap-x-2 justify-center"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

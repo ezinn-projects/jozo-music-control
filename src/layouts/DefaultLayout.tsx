@@ -24,7 +24,7 @@ const Layout: React.FC = () => {
           <div
             className={`${
               isQueueOpen ? "col-span-8" : "col-span-12"
-            } overflow-y-auto h-full`}
+            } overflow-y-auto h-[calc(100vh-200px)]`}
           >
             <Outlet />
           </div>

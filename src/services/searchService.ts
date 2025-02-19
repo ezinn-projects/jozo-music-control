@@ -25,13 +25,16 @@ export const searchSongs = async (
     );
 
     // Định dạng lại kết quả trả về từ API
-    return response.data.result.map((item: Video) => ({
-      video_id: item.video_id,
-      title: item.title,
-      thumbnail: item.thumbnail || "",
-      author: item.author || "Unknown Artist",
-      duration: item.duration || 0, // Nếu API trả về thời lượng
-    }));
+    return response?.data?.result && Array.isArray(response.data.result)
+      ? response.data.result.map((item: Video) => ({
+          video_id: item.video_id,
+          title: item.title,
+          thumbnail: item.thumbnail || "",
+          author: item.author || "Unknown Artist",
+          duration: item.duration || 0,
+        }))
+      : [];
+    // ... existing code ...
   } catch (error) {
     console.error("Error in searchSongs:", error);
     throw error; // Cho phép React Query hoặc caller xử lý lỗi
