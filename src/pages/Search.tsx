@@ -33,7 +33,6 @@ const SearchPage: React.FC = () => {
 
       return searchSongs(musicKeywords, roomId || "");
     },
-    select: (data) => data.filter((video) => video.author !== "Sing King"),
     enabled: !!debouncedQuery && !!roomId,
     staleTime: 1000 * 60 * 5, // Cache 5 phút
     // retry: 3,
