@@ -35,13 +35,13 @@ export const ToastContainer = () => {
   }, []);
 
   return (
-    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 space-y-4">
+    <div className="fixed top-4 right-4 z-50 space-y-4">
       {toasts.map((toast) => (
         <div
           key={toast.id}
           className={clsx("px-4 py-2 rounded shadow-lg animate-fade-in-out", {
             "bg-gray-800 text-white": toast.type === "default",
-            "bg-green-500 text-white": toast.type === "success",
+            "bg-pink-300 text-black": toast.type === "success",
             "bg-yellow-500 text-black": toast.type === "warning",
             "bg-red-500 text-white": toast.type === "error",
           })}

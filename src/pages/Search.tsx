@@ -25,11 +25,13 @@ const SearchPage: React.FC = () => {
     queryFn: () => {
       const isEnglishQuery = /^[a-zA-Z\s]+$/.test(debouncedQuery.trim());
 
-      const musicKeywords = karaoke
-        ? `karaoke beat ${debouncedQuery}`
-        : isEnglishQuery
-        ? `${debouncedQuery} beat music song karaoke`
-        : `${debouncedQuery} nhạc beat`;
+      const musicKeywords = isEnglishQuery
+        ? `${debouncedQuery} ${
+            karaoke ? "karaoke beat #song #music" : "song #music"
+          }`
+        : `${debouncedQuery} ${
+            karaoke ? "nhạc beat #karaoke" : "bài hát nhạc #hat #music #nhac"
+          }`;
 
       return searchSongs(musicKeywords, roomId || "");
     },
@@ -44,7 +46,17 @@ const SearchPage: React.FC = () => {
     <div className="p-4 space-y-6">
       <h2 className="text-xl font-bold">Kết quả tìm kiếm</h2>
 
-      {isLoading && <p className="text-gray-500">Đang tìm kiếm...</p>}
+      {isLoading && (
+        <div className="flex items-center justify-center p-4">
+          <p className="text-xl text-primary font-semibold animate-bounce-slow">
+            🎵
+            <span className="inline-block animate-pulse text-lightpink">
+              Jozo đang tìm kiếm bài hát cho tình yêu...
+            </span>
+            <span className="inline-block animate-spin-slow">💝</span>
+          </p>
+        </div>
+      )}
 
       {isError && (
         <p className="text-red-500">Có lỗi xảy ra khi tải kết quả tìm kiếm.</p>

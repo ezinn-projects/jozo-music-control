@@ -42,6 +42,8 @@ export default {
         marquee: "marquee 30s linear infinite", // Tổng thời gian: 30s
         breathing: "breathing 4s ease-in-out infinite",
         "fade-in-out": "fade-in-out 3s ease-in-out infinite",
+        'bounce-slow': 'bounce 3s infinite',
+        'spin-slow': 'spin 3s linear infinite',
       },
     },
   },

@@ -67,11 +67,15 @@ const SortableQueueItem = ({
         />
         <div className="flex justify-between items-center w-full max-w-[calc(100%-56px)]">
           <div className="flex-1 min-w-0">
-            <p className="font-bold truncate">{song.title}</p>
-            <p className="text-sm text-gray-400 truncate">{song.author}</p>
+            <p className="font-bold truncate marquee hover:marquee-animation max-w-[200px]">
+              {song.title}
+            </p>
+            <p className="text-sm text-gray-400 truncate marquee-text hover:marquee-animation">
+              {song.author}
+            </p>
           </div>
           <button
-            className="p-2 text-gray-400 hover:text-white transition-colors"
+            className="p-2 text-gray-400 hover:text-white transition-colors flex items-center"
             onClick={() => onRemove(idx)}
           >
             <RemoveIcon />
@@ -154,11 +158,16 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* Waiting Queue - phần scroll */}
-        <div
-          className="overflow-y-auto"
-          style={{ height: "calc(100vh - 350px)" }}
-        >
-          <div className="p-4">
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div
+            className="p-4"
+            style={{
+              paddingBottom: `${Math.max(
+                48,
+                (queueData?.result?.queue?.length || 0) * 10
+              )}px`,
+            }}
+          >
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-sm font-semibold text-gray-400">
                 Danh sách chờ
