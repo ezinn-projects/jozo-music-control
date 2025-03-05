@@ -159,3 +159,36 @@ export const usePlayNextSong = () => {
     },
   });
 };
+
+export const useRemoveAllSongs = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ roomId }: { roomId: string }) => {
+      const response = await http.delete(`/room-music/${roomId}`);
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      toast.success("Xóa tất cả bài hát thành công!");
+      queryClient.removeQueries({
+        queryKey: ["queue", variables.roomId],
+      });
+    },
+  });
+};
+
+export const useUpdateQueueOrder = () => {
+  return useMutation({
+    mutationFn: async ({
+      roomId,
+      queue,
+    }: {
+      roomId: string;
+      queue: Video[];
+    }) => {
+      const response = await http.put(`/room-music/${roomId}/queue`, {
+        queue,
+      });
+      return response.data;
+    },
+  });
+};

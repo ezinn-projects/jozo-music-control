@@ -1,5 +1,9 @@
 import RemoveIcon from "@/assets/icons/RemoveIcon";
-import { useRemoveSongFromQueue } from "@/hooks/useQueueMutations";
+import {
+  useRemoveAllSongs,
+  useRemoveSongFromQueue,
+  useUpdateQueueOrder,
+} from "@/hooks/useQueueMutations";
 import { useQueueQuery } from "@/hooks/useQueueQuery";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
@@ -96,6 +100,14 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
 
   const [items, setItems] = React.useState(queueData?.result?.queue || []);
 
+  const { mutate: removeAllSongs } = useRemoveAllSongs();
+
+  const { mutate: updateQueueOrder } = useUpdateQueueOrder();
+
+  const handleRemoveAll = () => {
+    removeAllSongs({ roomId: roomId });
+  };
+
   React.useEffect(() => {
     setItems(queueData?.result?.queue || []);
   }, [queueData?.result?.queue]);
@@ -114,8 +126,12 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
       );
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        setItems(arrayMove(items, oldIndex, newIndex));
-        // TODO: Gọi API để cập nhật thứ tự trên server
+        const result = arrayMove(items, oldIndex, newIndex);
+        setItems(result);
+        updateQueueOrder({
+          roomId: roomId,
+          queue: result,
+        });
       }
     }
   };
@@ -173,7 +189,10 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
                 Danh sách chờ
               </h3>
               {!!queueData?.result?.queue?.length && (
-                <button className="text-gray-400 hover:text-white flex items-center gap-x-3">
+                <button
+                  className="text-gray-400 hover:text-white flex items-center gap-x-3"
+                  onClick={handleRemoveAll}
+                >
                   xóa tất cả
                   <RemoveIcon />
                 </button>

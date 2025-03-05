@@ -36,6 +36,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const [params] = useSearchParams();
   const roomId = params.get("roomId") || "";
   const lastTimeUpdateRef = useRef<number>(0);
+  const [volume, setVolume] = useState(50);
 
   const { data: queueData, refetch } = useQueueQuery();
 
@@ -186,6 +187,10 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       }
     });
 
+    socketRef.current.on("volumeChange", (newVolume: number) => {
+      setVolume(newVolume);
+    });
+
     return () => {
       socketRef.current?.disconnect();
     };
@@ -285,6 +290,14 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         },
       }
     );
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = Number(e.target.value);
+    setVolume(newVolume);
+    console.log("newVolume", newVolume);
+
+    socketRef.current?.emit("adjustVolume", newVolume);
   };
 
   return (
@@ -395,13 +408,25 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
           {nowPlaying && (
             <div className="flex items-center space-x-2">
               <span className="text-lg">🔊</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                defaultValue="50"
-                className="w-24"
-              />
+              <div className="relative w-24">
+                <div className="absolute top-1/2 left-0 h-2 w-full bg-gray-500 rounded-full -translate-y-1/2"></div>
+                <div
+                  className="absolute z-10 top-1/2 left-0 h-2 bg-lightpink rounded-full -translate-y-1/2 transition-all duration-75"
+                  style={{
+                    width: `${volume}%`,
+                  }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  className="absolute z-20 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2
+                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-lightpink [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-30
+                    [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-lightpink [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:relative [&::-moz-range-thumb]:z-30"
+                />
+              </div>
             </div>
           )}
         </div>
