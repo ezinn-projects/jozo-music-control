@@ -167,7 +167,7 @@ export const useRemoveAllSongs = () => {
       const response = await http.delete(`/room-music/${roomId}`);
       return response.data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       toast.success("Xóa tất cả bài hát thành công!");
       queryClient.removeQueries({
         queryKey: ["queue", variables.roomId],
