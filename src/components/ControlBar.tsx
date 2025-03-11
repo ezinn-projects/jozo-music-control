@@ -295,8 +295,8 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = Number(e.target.value);
     setVolume(newVolume);
-    console.log("newVolume", newVolume);
 
+    // Chỉ gửi giá trị volume trực tiếp vì socket đã được gán vào room
     socketRef.current?.emit("adjustVolume", newVolume);
   };
 

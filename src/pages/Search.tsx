@@ -1,9 +1,9 @@
-import React from "react";
-import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import SongCard from "@/components/SongCard";
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchSongs } from "@/services/searchService";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
 // import { fetchResults } from "@/services/searchService"; // Đường dẫn tới fetchResults
 
 const SearchPage: React.FC = () => {
@@ -12,40 +12,36 @@ const SearchPage: React.FC = () => {
   const karaoke = searchParams.get("karaoke") === "true";
   const roomId = searchParams.get("roomId") || "";
 
-  // Debounced query
-  const debouncedQuery = useDebounce(query, 1900);
+  // Debounce cho search (3000ms)
+  const debouncedSearch = useDebounce(query, 3000);
 
-  // Sử dụng TanStack Query để fetch kết quả
+  // Query cho search results
   const {
     data: results = [],
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["searchResults", debouncedQuery, karaoke],
+    queryKey: ["searchResults", debouncedSearch, karaoke],
     queryFn: () => {
-      const isEnglishQuery = /^[a-zA-Z\s]+$/.test(debouncedQuery.trim());
-
+      const isEnglishQuery = /^[a-zA-Z\s]+$/.test(debouncedSearch.trim());
       const musicKeywords = isEnglishQuery
-        ? `${debouncedQuery} ${
+        ? `${debouncedSearch} ${
             karaoke ? "karaoke beat #song #music" : "song #music"
           }`
-        : `${debouncedQuery} ${
+        : `${debouncedSearch} ${
             karaoke ? "nhạc beat #karaoke" : "bài hát nhạc #hat #music #nhac"
           }`;
-
       return searchSongs(musicKeywords, roomId || "");
     },
-    enabled: !!debouncedQuery && !!roomId,
-    staleTime: 1000 * 60 * 5, // Cache 5 phút
-    // retry: 3,
+    enabled: debouncedSearch.length >= 2 && !!roomId,
+    staleTime: 1000 * 60 * 5,
   });
 
-  console.log("results", results);
-
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 relative">
       <h2 className="text-xl font-bold">Kết quả tìm kiếm</h2>
 
+      {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center p-4">
           <p className="text-xl text-primary font-semibold animate-bounce-slow">
@@ -58,10 +54,12 @@ const SearchPage: React.FC = () => {
         </div>
       )}
 
+      {/* Error State */}
       {isError && (
         <p className="text-red-500">Có lỗi xảy ra khi tải kết quả tìm kiếm.</p>
       )}
 
+      {/* Search Results */}
       {!isLoading && results.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {results?.map((result: Video) => (
@@ -70,6 +68,7 @@ const SearchPage: React.FC = () => {
         </div>
       )}
 
+      {/* No Results */}
       {!isLoading && results.length === 0 && query && (
         <p className="text-gray-500">Không có kết quả phù hợp.</p>
       )}

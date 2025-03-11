@@ -1,9 +1,12 @@
 import BellAlertIcon from "@/assets/icons/BellAlertIcon";
 import HomeIcon from "@/assets/icons/HomeIcon";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Switch from "./Switch";
 import { logo } from "@/assets/images";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useSongName } from "@/hooks/useSongName";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -13,6 +16,8 @@ const Header: React.FC = () => {
 
   const [searchParams] = useSearchParams();
   const roomId = searchParams.get("roomId") || "1";
+
+  const queryClient = useQueryClient();
 
   // Đồng bộ input search với query params
   useEffect(() => {
@@ -25,11 +30,37 @@ const Header: React.FC = () => {
 
   const isSearchPage = location.pathname.includes("/search");
 
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Debounce cho auto complete
+  const debouncedAutoComplete = useDebounce(searchTerm, 100);
+
+  // Query cho auto complete suggestions
+  const { data: songNameSuggestions } = useSongName(debouncedAutoComplete, {
+    enabled: showSuggestions && searchTerm.length >= 2,
+  });
+
+  // Click outside để đóng suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
+    setShowSuggestions(true);
 
-    // Thêm hoặc xóa query params
     if (value.trim()) {
       navigate(
         `/search?roomId=${roomId}&query=${encodeURIComponent(
@@ -37,16 +68,26 @@ const Header: React.FC = () => {
         )}&karaoke=${isKaraoke}`
       );
     } else {
-      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`); // Xóa query params nếu rỗng
+      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
     }
   };
 
-  const handleInputClick = () => {
+  const handleSelectSuggestion = (suggestion: string) => {
+    setShowSuggestions(false);
+    setSearchTerm(suggestion);
     navigate(
       `/search?roomId=${roomId}&query=${encodeURIComponent(
-        searchTerm.trim()
+        suggestion
       )}&karaoke=${isKaraoke}`
     );
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setShowSuggestions(false);
+    // Xóa cache của query
+    queryClient.removeQueries({ queryKey: ["songName"] });
+    navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
   };
 
   return (
@@ -67,15 +108,59 @@ const Header: React.FC = () => {
       />
 
       {/* Search Input */}
-      <div className="w-1/2 flex items-center gap-x-4">
-        <input
-          type="text"
-          placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
-          value={searchTerm}
-          onChange={handleInputChange}
-          className="w-full p-3 bg-secondary text-white rounded-lg shadow-md focus:outline-none"
-          onClick={handleInputClick}
-        />
+      <div
+        className="w-1/2 flex items-center gap-x-4 relative"
+        ref={searchContainerRef}
+      >
+        <div className="relative w-full">
+          <input
+            type="text"
+            placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
+            value={searchTerm}
+            onChange={handleInputChange}
+            onFocus={() => setShowSuggestions(true)}
+            className="w-full p-3 bg-secondary text-white rounded-lg shadow-md focus:outline-none"
+          />
+          {searchTerm && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Auto Complete Suggestions */}
+        {showSuggestions &&
+          songNameSuggestions &&
+          songNameSuggestions.length > 0 && (
+            <div className="absolute top-full left-0 w-full bg-white shadow-lg rounded-lg z-50 border border-gray-200 mt-1">
+              {songNameSuggestions?.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="p-2 hover:bg-gray-100 cursor-pointer text-gray-800"
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
+
         <div className="flex items-center gap-x-2">
           <span className="text-sm whitespace-nowrap">Lời nhạc</span>
           <Switch
