@@ -179,8 +179,8 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
             className="p-4"
             style={{
               paddingBottom: `${Math.max(
-                48,
-                (queueData?.result?.queue?.length || 0) * 10
+                60,
+                (queueData?.result?.queue?.length || 0) * 20
               )}px`,
             }}
           >
