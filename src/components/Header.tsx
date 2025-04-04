@@ -103,8 +103,8 @@ const Header: React.FC = () => {
       <img
         src={logo}
         alt="Jozo"
-        className="w-20 h-10 cursor-pointer"
-        onClick={() => navigate(`/?roomId=${roomId}&karaoke=${isKaraoke}`)}
+        className="w-20 h-10 cursor-pointer animate-breathing"
+        onClick={() => navigate(`/?roomId=${roomId}`)}
       />
 
       {/* Search Input */}
