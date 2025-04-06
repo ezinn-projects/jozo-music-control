@@ -24,35 +24,53 @@ const SongCard: React.FC<SongCardProps> = ({
   const roomId = searchParams.get("roomId") || "";
 
   const handleAddToTop = () => {
-    addSongToQueue.mutate({
-      song: { video_id, title, thumbnail, author, duration },
-      position: "top",
-      roomId,
-    });
-    setIsModalOpen(false);
+    addSongToQueue.mutate(
+      {
+        song: { video_id, title, thumbnail, author, duration },
+        position: "top",
+        roomId,
+      },
+      {
+        onSuccess: () => {
+          setIsModalOpen(false);
+        },
+      }
+    );
   };
 
   const handleAddToEnd = () => {
-    addSongToQueue.mutate({
-      song: { video_id, title, thumbnail, author, duration },
-      position: "end",
-      roomId,
-    });
-    setIsModalOpen(false);
+    addSongToQueue.mutate(
+      {
+        song: { video_id, title, thumbnail, author, duration },
+        position: "end",
+        roomId,
+      },
+      {
+        onSuccess: () => {
+          setIsModalOpen(false);
+        },
+      }
+    );
   };
 
   return (
     <>
       <div
-        className="shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+        className="shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer user-select-none"
         onClick={() => setIsModalOpen(true)}
       >
-        <img src={thumbnail} alt={title} className="w-full h-40 object-cover" />
+        <img
+          src={thumbnail}
+          alt={title}
+          className="w-full h-40 object-cover user-select-none"
+        />
         <div className="p-4">
-          <h3 className="text-sm font-semibold mb-1 line-clamp-2 min-h-10">
+          <h3 className="text-sm font-semibold mb-1 line-clamp-2 min-h-10 user-select-none">
             {title}
           </h3>
-          <p className="text-xs text-gray-500 truncate">{author}</p>
+          <p className="text-xs text-gray-500 truncate user-select-none">
+            {author}
+          </p>
         </div>
       </div>
 

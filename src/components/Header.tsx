@@ -34,11 +34,27 @@ const Header: React.FC = () => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   // Debounce cho auto complete
-  const debouncedAutoComplete = useDebounce(searchTerm, 100);
+  const debouncedAutoComplete = useDebounce(searchTerm, 300);
+
+  // Debounce cho navigation để giảm lag
+  const debouncedNavigationTerm = useDebounce(searchTerm, 500);
+
+  // Xử lý navigation khi debounced term thay đổi
+  useEffect(() => {
+    if (debouncedNavigationTerm.trim()) {
+      navigate(
+        `/search?roomId=${roomId}&query=${encodeURIComponent(
+          debouncedNavigationTerm
+        )}&karaoke=${isKaraoke}`
+      );
+    } else if (debouncedNavigationTerm === "") {
+      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+    }
+  }, [debouncedNavigationTerm, isKaraoke, roomId, navigate]);
 
   // Query cho auto complete suggestions
   const { data: songNameSuggestions } = useSongName(debouncedAutoComplete, {
-    enabled: showSuggestions && searchTerm.length >= 2,
+    enabled: showSuggestions && debouncedAutoComplete.length >= 2,
   });
 
   // Click outside để đóng suggestions
@@ -60,16 +76,7 @@ const Header: React.FC = () => {
     const value = e.target.value;
     setSearchTerm(value);
     setShowSuggestions(true);
-
-    if (value.trim()) {
-      navigate(
-        `/search?roomId=${roomId}&query=${encodeURIComponent(
-          value
-        )}&karaoke=${isKaraoke}`
-      );
-    } else {
-      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
-    }
+    // Navigation sẽ được xử lý trong useEffect với debounce
   };
 
   const handleSelectSuggestion = (suggestion: string) => {

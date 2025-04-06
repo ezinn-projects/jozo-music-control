@@ -19,7 +19,7 @@ export const useQueueMutations = () => {
     }) => {
       const response = await http.post<
         ApiResponse<{ queue: Video[]; nowPlaying: Video }>
-      >(`/room-music/${roomId}`, {
+      >(`/room-music/${roomId}/queue`, {
         ...song,
         position,
       });
@@ -76,7 +76,7 @@ export const useRemoveSongFromQueue = () => {
     }) => {
       const response = await http.delete<
         ApiResponse<{ queue: Video[]; nowPlaying: Video }>
-      >(`/room-music/${roomId}/${videoIndex}`);
+      >(`/room-music/${roomId}/queue/${videoIndex}`);
       return response.data;
     },
     onSuccess: (data, variables) => {
@@ -160,11 +160,54 @@ export const usePlayNextSong = () => {
   });
 };
 
+export const usePlayChosenSong = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      roomId,
+      videoIndex,
+    }: {
+      roomId: string;
+      videoIndex: number;
+    }) => {
+      // Đây là API endpoint sẽ được thêm ở backend
+      const response = await http.post(
+        `/room-music/${roomId}/play-chosen-song`,
+        { videoIndex }
+      );
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        ["queue", variables.roomId],
+        (
+          oldData:
+            | ApiResponse<{
+                nowPlaying: Video;
+                queue: Video[];
+              }>
+            | undefined
+        ) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            result: {
+              ...oldData.result,
+              ...data.result,
+            },
+          };
+        }
+      );
+    },
+  });
+};
+
 export const useRemoveAllSongs = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ roomId }: { roomId: string }) => {
-      const response = await http.delete(`/room-music/${roomId}`);
+      const response = await http.delete(`/room-music/${roomId}/queue`);
       return response.data;
     },
     onSuccess: (_, variables) => {

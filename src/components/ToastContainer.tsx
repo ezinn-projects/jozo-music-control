@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 
 type ToastType = "default" | "success" | "warning" | "error";
@@ -7,25 +7,32 @@ interface Toast {
   id: string;
   message: string;
   type: ToastType;
+  createdAt: number;
 }
 
 const toastQueue: Array<(message: string, type?: ToastType) => void> = [];
 
 export const ToastContainer = () => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toast, setToast] = useState<Toast | null>(null);
 
-  // Hàm để thêm toast vào state
+  // Hàm để thêm toast mới
   const addToast = (message: string, type: ToastType = "default") => {
     const id = Math.random().toString(36).substr(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    const newToast = { id, message, type, createdAt: Date.now() };
 
+    // Thay thế toast hiện tại bằng toast mới
+    setToast(newToast);
+
+    // Tự động xóa toast sau 3 giây
     setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 3000); // Auto-remove after 3s
+      setToast((currentToast) =>
+        currentToast?.id === id ? null : currentToast
+      );
+    }, 3000);
   };
 
   // Đăng ký hàm này vào hàng đợi toàn cục
-  React.useEffect(() => {
+  useEffect(() => {
     toastQueue.push(addToast);
     return () => {
       // Cleanup nếu component bị unmount
@@ -34,21 +41,25 @@ export const ToastContainer = () => {
     };
   }, []);
 
+  if (!toast) return null;
+
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-4">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={clsx("px-4 py-2 rounded shadow-lg animate-fade-in-out", {
+    <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
+      <div
+        key={toast.id}
+        className={clsx(
+          "px-6 py-3 rounded-lg shadow-xl max-w-md text-center transition-opacity duration-300",
+          "animate-fade-in-out pointer-events-auto",
+          {
             "bg-gray-800 text-white": toast.type === "default",
-            "bg-pink-300 text-black": toast.type === "success",
+            "bg-green-500 text-white": toast.type === "success",
             "bg-yellow-500 text-black": toast.type === "warning",
             "bg-red-500 text-white": toast.type === "error",
-          })}
-        >
-          {toast.message}
-        </div>
-      ))}
+          }
+        )}
+      >
+        {toast.message}
+      </div>
     </div>
   );
 };
