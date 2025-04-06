@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import clsx from "clsx";
+import { useEffect, useState } from "react";
 
 type ToastType = "default" | "success" | "warning" | "error";
 
