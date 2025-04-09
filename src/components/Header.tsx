@@ -41,6 +41,14 @@ const Header: React.FC = () => {
 
   // Xử lý navigation khi debounced term thay đổi
   useEffect(() => {
+    // Nếu đã ở trang search và không có thay đổi nào, không cần chuyển hướng lại
+    if (
+      location.pathname.includes("/search") &&
+      debouncedNavigationTerm === ""
+    ) {
+      return;
+    }
+
     if (debouncedNavigationTerm.trim()) {
       navigate(
         `/search?roomId=${roomId}&query=${encodeURIComponent(
@@ -48,9 +56,10 @@ const Header: React.FC = () => {
         )}&karaoke=${isKaraoke}`
       );
     } else if (debouncedNavigationTerm === "") {
+      // Chỉ navigate nếu cần chuyển từ trang khác về trang search
       navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
     }
-  }, [debouncedNavigationTerm, isKaraoke, roomId, navigate]);
+  }, [debouncedNavigationTerm, isKaraoke, roomId, location.pathname, navigate]);
 
   // Query cho auto complete suggestions
   const { data: songNameSuggestions } = useSongName(debouncedAutoComplete, {
