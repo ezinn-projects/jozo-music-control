@@ -141,15 +141,22 @@ const SortableQueueItem = ({
     };
   }, [roomId]);
 
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id: `${idx}-${song.title}`,
-    });
+  // Lấy thêm isDragging từ useSortable để có thể điều chỉnh thuộc tính touchAction
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: `${idx}-${song.title}`,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    touchAction: "none",
+    touchAction: isDragging ? "none" : "auto",
   };
 
   const handleItemClick = () => {
