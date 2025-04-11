@@ -37,29 +37,29 @@ const Header: React.FC = () => {
   const debouncedAutoComplete = useDebounce(searchTerm, 300);
 
   // Debounce cho navigation để giảm lag
-  const debouncedNavigationTerm = useDebounce(searchTerm, 500);
+  // const debouncedNavigationTerm = useDebounce(searchTerm, 500);
 
-  // Xử lý navigation khi debounced term thay đổi
-  useEffect(() => {
-    // Nếu đã ở trang search và không có thay đổi nào, không cần chuyển hướng lại
-    if (
-      location.pathname.includes("/search") &&
-      debouncedNavigationTerm === ""
-    ) {
-      return;
-    }
+  // // Xử lý navigation khi debounced term thay đổi
+  // useEffect(() => {
+  //   // Nếu đã ở trang search và không có thay đổi nào, không cần chuyển hướng lại
+  //   if (
+  //     location.pathname.includes("/search") &&
+  //     debouncedNavigationTerm === ""
+  //   ) {
+  //     return;
+  //   }
 
-    if (debouncedNavigationTerm.trim()) {
-      navigate(
-        `/search?roomId=${roomId}&query=${encodeURIComponent(
-          debouncedNavigationTerm
-        )}&karaoke=${isKaraoke}`
-      );
-    } else if (debouncedNavigationTerm === "") {
-      // Chỉ navigate nếu cần chuyển từ trang khác về trang search
-      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
-    }
-  }, [debouncedNavigationTerm, isKaraoke, roomId, location.pathname, navigate]);
+  //   if (debouncedNavigationTerm.trim()) {
+  //     navigate(
+  //       `/search?roomId=${roomId}&query=${encodeURIComponent(
+  //         debouncedNavigationTerm
+  //       )}&karaoke=${isKaraoke}`
+  //     );
+  //   } else if (debouncedNavigationTerm === "") {
+  //     // Chỉ navigate nếu cần chuyển từ trang khác về trang search
+  //     navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+  //   }
+  // }, [debouncedNavigationTerm, isKaraoke, roomId, location.pathname, navigate]);
 
   // Query cho auto complete suggestions
   const { data: songNameSuggestions } = useSongName(debouncedAutoComplete, {
@@ -134,7 +134,10 @@ const Header: React.FC = () => {
             placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
             value={searchTerm}
             onChange={handleInputChange}
-            onFocus={() => setShowSuggestions(true)}
+            onFocus={() => {
+              setShowSuggestions(true);
+              navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+            }}
             className="w-full p-3 bg-secondary text-white rounded-lg shadow-md focus:outline-none"
           />
           {searchTerm && (
