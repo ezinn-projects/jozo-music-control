@@ -1,19 +1,35 @@
 import SongCard from "@/components/SongCard";
-import { useDebounce } from "@/hooks/useDebounce";
 import { searchSongs } from "@/services/searchService";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import { useSearchParams } from "react-router-dom";
-// import { fetchResults } from "@/services/searchService"; // Đường dẫn tới fetchResults
+import React, { useEffect, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("query") || "";
   const karaoke = searchParams.get("karaoke") === "true";
   const roomId = searchParams.get("roomId") || "";
+  const location = useLocation();
 
-  // Debounce cho search (3000ms)
-  const debouncedSearch = useDebounce(query, 3000);
+  // State để kiểm soát khi nào thực hiện tìm kiếm
+  const [shouldSearch, setShouldSearch] = useState(false);
+  // Lưu trữ query đã được xử lý (loại bỏ khoảng trắng ở cuối)
+  const [processedQuery, setProcessedQuery] = useState("");
+
+  // Theo dõi thay đổi URL để kích hoạt tìm kiếm khi người dùng nhấn Enter hoặc chọn suggestion
+  useEffect(() => {
+    if (query.length >= 2) {
+      // Xử lý query để loại bỏ khoảng trắng ở cuối
+      const trimmedQuery = query.trimEnd();
+      // Chỉ cập nhật processedQuery khi nó thực sự thay đổi (không phải chỉ thêm space)
+      if (trimmedQuery !== processedQuery) {
+        setProcessedQuery(trimmedQuery);
+        setShouldSearch(true);
+      } else {
+        setShouldSearch(true);
+      }
+    }
+  }, [location.search, query]);
 
   // Query cho search results
   const {
@@ -21,19 +37,19 @@ const SearchPage: React.FC = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["searchResults", debouncedSearch, karaoke],
+    queryKey: ["searchResults", processedQuery, karaoke],
     queryFn: () => {
-      const isEnglishQuery = /^[a-zA-Z\s]+$/.test(debouncedSearch.trim());
+      const isEnglishQuery = /^[a-zA-Z\s]+$/.test(processedQuery.trim());
       const musicKeywords = isEnglishQuery
-        ? `${debouncedSearch} ${
+        ? `${processedQuery} ${
             karaoke ? "karaoke beat #song #music" : "song #music"
           }`
-        : `${debouncedSearch} ${
+        : `${processedQuery} ${
             karaoke ? "nhạc beat #karaoke" : "bài hát nhạc #hat #music #nhac"
           }`;
       return searchSongs(musicKeywords, roomId || "");
     },
-    enabled: debouncedSearch.length >= 2 && !!roomId,
+    enabled: shouldSearch && processedQuery.length >= 2 && !!roomId,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -69,8 +85,15 @@ const SearchPage: React.FC = () => {
       )}
 
       {/* No Results */}
-      {!isLoading && results.length === 0 && query && (
+      {!isLoading && results.length === 0 && processedQuery && shouldSearch && (
         <p className="text-gray-500">Không có kết quả phù hợp.</p>
+      )}
+
+      {/* Instruction for user */}
+      {!shouldSearch && processedQuery && (
+        <p className="text-gray-500">
+          Nhấn Enter để tìm kiếm hoặc chọn từ gợi ý.
+        </p>
       )}
     </div>
   );
