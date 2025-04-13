@@ -25,7 +25,10 @@ const Home: React.FC = () => {
   const { data: trendingVideos = [], isLoading } = useQuery({
     queryKey: ["trendingVideos1"],
     queryFn: () =>
-      searchSongs("nhạc hot 2024 karaoke beat xu hướng Việt Nam", roomId),
+      searchSongs(
+        "#karaoke #music #nhạc HieuThuHai Sơn Tùng M-TP Den Vau tlinh MONO WEAN AMEE Hoàng Thùy Linh",
+        roomId
+      ),
     staleTime: 1000 * 60 * 30, // Cache 30 phút
   });
 

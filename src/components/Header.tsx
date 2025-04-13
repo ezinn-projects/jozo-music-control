@@ -29,6 +29,7 @@ const Header: React.FC = () => {
   }, [location.search]);
 
   const isSearchPage = location.pathname.includes("/search");
+  const isHomePage = location.pathname === "/" || location.pathname === "";
 
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -37,29 +38,39 @@ const Header: React.FC = () => {
   const debouncedAutoComplete = useDebounce(searchTerm, 300);
 
   // Debounce cho navigation để giảm lag
-  // const debouncedNavigationTerm = useDebounce(searchTerm, 500);
+  const debouncedNavigationTerm = useDebounce(searchTerm, 500);
 
-  // // Xử lý navigation khi debounced term thay đổi
-  // useEffect(() => {
-  //   // Nếu đã ở trang search và không có thay đổi nào, không cần chuyển hướng lại
-  //   if (
-  //     location.pathname.includes("/search") &&
-  //     debouncedNavigationTerm === ""
-  //   ) {
-  //     return;
-  //   }
+  // Xử lý navigation khi debounced term thay đổi
+  useEffect(() => {
+    // Nếu đang ở trang home, không thực hiện navigation tự động
+    if (isHomePage) {
+      return;
+    }
 
-  //   if (debouncedNavigationTerm.trim()) {
-  //     navigate(
-  //       `/search?roomId=${roomId}&query=${encodeURIComponent(
-  //         debouncedNavigationTerm
-  //       )}&karaoke=${isKaraoke}`
-  //     );
-  //   } else if (debouncedNavigationTerm === "") {
-  //     // Chỉ navigate nếu cần chuyển từ trang khác về trang search
-  //     navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
-  //   }
-  // }, [debouncedNavigationTerm, isKaraoke, roomId, location.pathname, navigate]);
+    // Nếu đã ở trang search và không có thay đổi nào, không cần chuyển hướng lại
+    if (isSearchPage && debouncedNavigationTerm === "") {
+      return;
+    }
+
+    if (debouncedNavigationTerm.trim()) {
+      navigate(
+        `/search?roomId=${roomId}&query=${encodeURIComponent(
+          debouncedNavigationTerm
+        )}&karaoke=${isKaraoke}`
+      );
+    } else if (debouncedNavigationTerm === "" && !isHomePage) {
+      // Chỉ navigate nếu cần chuyển từ trang khác về trang search và không phải từ trang home
+      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+    }
+  }, [
+    debouncedNavigationTerm,
+    isKaraoke,
+    roomId,
+    location.pathname,
+    navigate,
+    isHomePage,
+    isSearchPage,
+  ]);
 
   // Query cho auto complete suggestions
   const { data: songNameSuggestions } = useSongName(debouncedAutoComplete, {
@@ -103,7 +114,15 @@ const Header: React.FC = () => {
     setShowSuggestions(false);
     // Xóa cache của query
     queryClient.removeQueries({ queryKey: ["songName"] });
-    navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+
+    // Nếu đang ở trang search, thì mới navigate lại trang search
+    if (isSearchPage) {
+      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+    }
+  };
+
+  const handleHomeNavigation = () => {
+    navigate(`/?roomId=${roomId}&karaoke=${isKaraoke}`);
   };
 
   return (
@@ -120,7 +139,7 @@ const Header: React.FC = () => {
         src={logo}
         alt="Jozo"
         className="w-20 h-10 cursor-pointer animate-breathing"
-        onClick={() => navigate(`/?roomId=${roomId}`)}
+        onClick={handleHomeNavigation}
       />
 
       {/* Search Input */}
@@ -136,7 +155,9 @@ const Header: React.FC = () => {
             onChange={handleInputChange}
             onFocus={() => {
               setShowSuggestions(true);
-              navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+              if (!isSearchPage) {
+                navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+              }
             }}
             className="w-full p-3 bg-secondary text-white rounded-lg shadow-md focus:outline-none"
           />
@@ -186,11 +207,13 @@ const Header: React.FC = () => {
             isChecked={isKaraoke}
             onChange={() => {
               setIsKaraoke(!isKaraoke);
-              navigate(
-                `/search?query=${encodeURIComponent(
-                  searchTerm.trim()
-                )}&karaoke=${!isKaraoke}&roomId=${roomId}`
-              );
+              if (isSearchPage) {
+                navigate(
+                  `/search?query=${encodeURIComponent(
+                    searchTerm.trim()
+                  )}&karaoke=${!isKaraoke}&roomId=${roomId}`
+                );
+              }
             }}
           />
         </div>
@@ -200,7 +223,7 @@ const Header: React.FC = () => {
       <div className="flex items-center space-x-4">
         <button
           className={isSearchPage ? "opacity-100" : "opacity-0"}
-          onClick={() => navigate(`/?roomId=${roomId}`)}
+          onClick={handleHomeNavigation}
         >
           <HomeIcon />
         </button>

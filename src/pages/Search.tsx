@@ -1,8 +1,18 @@
 import SongCard from "@/components/SongCard";
 import { searchSongs } from "@/services/searchService";
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import debounce from "lodash/debounce";
+
+// Helper function to detect mobile/tablet devices
+const isMobileOrTablet = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobile = /iphone|ipad|ipod|android|blackberry|windows phone/g.test(
+    userAgent
+  );
+  return isMobile;
+};
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -16,20 +26,64 @@ const SearchPage: React.FC = () => {
   // Lưu trữ query đã được xử lý (loại bỏ khoảng trắng ở cuối)
   const [processedQuery, setProcessedQuery] = useState("");
 
-  // Theo dõi thay đổi URL để kích hoạt tìm kiếm khi người dùng nhấn Enter hoặc chọn suggestion
+  // Tạo hàm debounce để tránh gọi API quá nhiều lần
+  const debouncedSearch = useCallback(
+    debounce((trimmedQuery: string) => {
+      setProcessedQuery(trimmedQuery);
+      setShouldSearch(true);
+    }, 500),
+    []
+  );
+
+  // Theo dõi thay đổi URL để kích hoạt tìm kiếm khi người dùng nhập
   useEffect(() => {
     if (query.length >= 2) {
-      // Xử lý query để loại bỏ khoảng trắng ở cuối
       const trimmedQuery = query.trimEnd();
-      // Chỉ cập nhật processedQuery khi nó thực sự thay đổi (không phải chỉ thêm space)
-      if (trimmedQuery !== processedQuery) {
-        setProcessedQuery(trimmedQuery);
-        setShouldSearch(true);
-      } else {
-        setShouldSearch(true);
-      }
+      debouncedSearch(trimmedQuery);
+    } else {
+      setProcessedQuery("");
+      setShouldSearch(false);
     }
-  }, [location.search, query]);
+
+    // Enhanced keyboard handling for mobile devices
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && isMobileOrTablet()) {
+        e.preventDefault();
+        // Blur any focused input element
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+        // For iOS devices, we can try to force the keyboard to close
+        // by temporarily making the input readonly
+        const activeInput = document.activeElement as HTMLInputElement;
+        if (activeInput?.tagName === "INPUT") {
+          activeInput.setAttribute("readonly", "readonly");
+          setTimeout(() => {
+            activeInput.removeAttribute("readonly");
+          }, 100);
+        }
+      }
+    };
+
+    // Handle form submission on mobile
+    const handleFormSubmit = (e: Event) => {
+      if (isMobileOrTablet()) {
+        e.preventDefault();
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("submit", handleFormSubmit);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("submit", handleFormSubmit);
+      debouncedSearch.cancel();
+    };
+  }, [location.search, query, debouncedSearch]);
 
   // Query cho search results
   const {
@@ -90,9 +144,9 @@ const SearchPage: React.FC = () => {
       )}
 
       {/* Instruction for user */}
-      {!shouldSearch && processedQuery && (
+      {query.length < 2 && (
         <p className="text-gray-500">
-          Nhấn Enter để tìm kiếm hoặc chọn từ gợi ý.
+          Nhập ít nhất 2 ký tự để tìm kiếm bài hát.
         </p>
       )}
     </div>

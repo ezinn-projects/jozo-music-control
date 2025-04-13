@@ -141,7 +141,6 @@ const SortableQueueItem = ({
     };
   }, [roomId]);
 
-  // Lấy thêm isDragging từ useSortable để có thể điều chỉnh thuộc tính touchAction
   const {
     attributes,
     listeners,
@@ -157,6 +156,10 @@ const SortableQueueItem = ({
     transform: CSS.Transform.toString(transform),
     transition,
     touchAction: isDragging ? "none" : "auto",
+    zIndex: isDragging ? 1000 : 1,
+    position: "relative" as const,
+    opacity: isDragging ? 0.5 : 1,
+    backgroundColor: isDragging ? "rgba(255, 255, 255, 0.1)" : "transparent",
   };
 
   const handleItemClick = () => {
@@ -170,8 +173,6 @@ const SortableQueueItem = ({
 
   const handlePlayNow = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    // Gọi API để phát bài hát được chọn
     playChosenSong(
       {
         roomId,
@@ -179,18 +180,14 @@ const SortableQueueItem = ({
       },
       {
         onSuccess: () => {
-          // Thông báo cho socket để cập nhật các clients khác
           socketRef.current?.emit("next_song", { roomId });
           socketRef.current?.emit("get_now_playing", { roomId });
-
-          // Cập nhật cache
           queryClient.invalidateQueries({
             queryKey: ["queue", roomId],
           });
         },
       }
     );
-
     setShowPlayPopup(false);
   };
 
@@ -200,43 +197,47 @@ const SortableQueueItem = ({
         ref={setNodeRef}
         style={style}
         {...attributes}
-        className="flex items-center space-x-4 mb-4 relative"
+        className={`flex items-center space-x-4 mb-4 relative rounded-lg p-2 transition-colors ${
+          isDragging ? "shadow-lg" : ""
+        }`}
       >
-        <div
-          className="flex items-center space-x-4 w-full cursor-pointer"
-          onClick={handleItemClick}
-        >
+        <div className="flex items-center space-x-4 w-full">
           <div
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-white"
+            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-white touch-none select-none"
             onClick={(e) => e.stopPropagation()}
           >
             <DragHandleIcon />
           </div>
-          <img
-            src={song.thumbnail}
-            alt={song.title}
-            className="w-12 h-12 object-cover rounded-lg"
-          />
-          <div className="flex justify-between items-center w-full max-w-[calc(100%-56px)]">
-            <div className="flex-1 min-w-0">
-              <p className="font-bold truncate marquee hover:marquee-animation max-w-[200px] user-select-none">
-                {song.title}
-              </p>
-              <p className="text-sm text-gray-400 truncate marquee-text hover:marquee-animation user-select-none">
-                {song.author}
-              </p>
+          <div
+            className="flex items-center space-x-4 w-full cursor-pointer"
+            onClick={handleItemClick}
+          >
+            <img
+              src={song.thumbnail}
+              alt={song.title}
+              className="w-12 h-12 object-cover rounded-lg"
+            />
+            <div className="flex justify-between items-center w-full max-w-[calc(100%-56px)]">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold truncate marquee hover:marquee-animation max-w-[200px] user-select-none">
+                  {song.title}
+                </p>
+                <p className="text-sm text-gray-400 truncate marquee-text hover:marquee-animation user-select-none">
+                  {song.author}
+                </p>
+              </div>
+              <button
+                className="p-2 text-gray-400 hover:text-white transition-colors flex items-center min-w-[40px] min-h-[40px]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(idx);
+                }}
+                aria-label="Xóa bài hát"
+              >
+                <RemoveIcon />
+              </button>
             </div>
-            <button
-              className="p-2 text-gray-400 hover:text-white transition-colors flex items-center min-w-[40px] min-h-[40px]"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove(idx);
-              }}
-              aria-label="Xóa bài hát"
-            >
-              <RemoveIcon />
-            </button>
           </div>
         </div>
       </div>
