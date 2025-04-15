@@ -7,6 +7,8 @@ import { logo } from "@/assets/images";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSongName } from "@/hooks/useSongName";
 import { useQueryClient } from "@tanstack/react-query";
+import useRoom from "@/hooks/useRoom";
+import { toast } from "./ToastContainer";
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -18,6 +20,8 @@ const Header: React.FC = () => {
   const roomId = searchParams.get("roomId") || "1";
 
   const queryClient = useQueryClient();
+
+  const { mutate: sendNotification } = useRoom();
 
   // Đồng bộ input search với query params
   useEffect(() => {
@@ -76,7 +80,6 @@ const Header: React.FC = () => {
   const { data: songNameSuggestions } = useSongName(debouncedAutoComplete, {
     enabled: showSuggestions && debouncedAutoComplete.length >= 2,
   });
-
   // Click outside để đóng suggestions
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -125,6 +128,19 @@ const Header: React.FC = () => {
     navigate(`/?roomId=${roomId}&karaoke=${isKaraoke}`);
   };
 
+  const handleNotification = () => {
+    sendNotification(
+      { roomId, message: "Yêu cầu hỗ trợ" },
+      {
+        onSuccess: () => {
+          toast.success("Đã yêu cầu nhân viên hỗ trợ");
+        },
+        onError: () => {
+          toast.error("Gặp lỗi khi yêu cầu nhân viên hỗ trợ");
+        },
+      }
+    );
+  };
   return (
     <header className="bg-black text-white p-4 flex items-center justify-between shadow-md z-50">
       {/* Logo */}
@@ -228,7 +244,7 @@ const Header: React.FC = () => {
           <HomeIcon />
         </button>
 
-        <button>
+        <button onClick={handleNotification}>
           <BellAlertIcon />
         </button>
       </div>

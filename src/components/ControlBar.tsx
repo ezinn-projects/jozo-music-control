@@ -40,8 +40,6 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
 
   const { data: queueData, refetch } = useQueueQuery();
 
-  console.log("queueData", queueData);
-
   const { mutate: playNextSong } = usePlayNextSong();
 
   const duration = queueData?.result.nowPlaying?.duration || 0;
