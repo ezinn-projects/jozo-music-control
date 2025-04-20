@@ -134,6 +134,7 @@ const SortableQueueItem = ({
   useEffect(() => {
     socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
       query: { roomId },
+      transports: ["websocket"],
     });
 
     return () => {

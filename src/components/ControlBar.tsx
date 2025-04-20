@@ -49,6 +49,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   useEffect(() => {
     socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
       query: { roomId },
+      transports: ["websocket"],
     });
 
     socketRef.current.on("time_updated", (data: any) => {
