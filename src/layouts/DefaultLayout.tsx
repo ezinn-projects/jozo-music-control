@@ -1,11 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "@/components/Header";
 import ControlBar from "@/components/ControlBar";
 import QueueSidebar from "@/components/QueueSidebar";
+// import { Socket } from "socket.io-client";
 
 const Layout: React.FC = () => {
   const [isQueueOpen, setIsQueueOpen] = useState(false);
+  // const socketRef = useRef<typeof Socket | null>(null);
+  // const [params] = useSearchParams();
+  // const roomId = params.get("roomId") || "";
+
+  // listen event from backend by socket.io
+  useEffect(() => {
+    // socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
+    //   query: { roomId },
+    // });
+
+    // socketRef.current.on("videos_turned_off", (data: unknown) => {
+    //   console.log(data);
+    // });
+
+    return () => {
+      // socketRef.current?.disconnect();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">
