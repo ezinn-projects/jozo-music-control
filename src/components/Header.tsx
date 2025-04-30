@@ -44,28 +44,25 @@ const Header: React.FC = () => {
   // Debounce cho navigation để giảm lag
   const debouncedNavigationTerm = useDebounce(searchTerm, 500);
 
-  // Xử lý navigation khi debounced term thay đổi
+  // Separate effect for navigation to prevent interference with input
   useEffect(() => {
-    // Nếu đang ở trang home, không thực hiện navigation tự động
     if (isHomePage) {
       return;
     }
 
-    // Nếu đã ở trang search và không có thay đổi nào, không cần chuyển hướng lại
-    if (isSearchPage && debouncedNavigationTerm === "") {
-      return;
-    }
+    const timeoutId = setTimeout(() => {
+      if (debouncedNavigationTerm.trim()) {
+        navigate(
+          `/search?roomId=${roomId}&query=${encodeURIComponent(
+            debouncedNavigationTerm
+          )}&karaoke=${isKaraoke}`
+        );
+      } else if (debouncedNavigationTerm === "" && !isHomePage) {
+        navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+      }
+    }, 500);
 
-    if (debouncedNavigationTerm.trim()) {
-      navigate(
-        `/search?roomId=${roomId}&query=${encodeURIComponent(
-          debouncedNavigationTerm
-        )}&karaoke=${isKaraoke}`
-      );
-    } else if (debouncedNavigationTerm === "" && !isHomePage) {
-      // Chỉ navigate nếu cần chuyển từ trang khác về trang search và không phải từ trang home
-      navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
-    }
+    return () => clearTimeout(timeoutId);
   }, [
     debouncedNavigationTerm,
     isKaraoke,
@@ -73,7 +70,6 @@ const Header: React.FC = () => {
     location.pathname,
     navigate,
     isHomePage,
-    isSearchPage,
   ]);
 
   // Query cho auto complete suggestions
@@ -99,7 +95,6 @@ const Header: React.FC = () => {
     const value = e.target.value;
     setSearchTerm(value);
     setShowSuggestions(true);
-    // Navigation sẽ được xử lý trong useEffect với debounce
   };
 
   const handleSelectSuggestion = (suggestion: string) => {
