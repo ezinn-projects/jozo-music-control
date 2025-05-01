@@ -9,7 +9,7 @@ import axiosInstance from "@/utils/http";
 export const searchSongs = async (
   query: string,
   roomId: string,
-  limit: number = 30
+  limit: number = 50
 ): Promise<Video[]> => {
   if (!query) return [];
 
