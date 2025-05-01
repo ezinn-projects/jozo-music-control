@@ -63,36 +63,46 @@ const Header: React.FC = () => {
     const value = e.target.value;
     setSearchTerm(value);
     setShowSuggestions(true);
+
+    // Trigger navigation with debounce on all pages
+    debouncedNavigate(value);
   };
 
   // Create memoized navigation function
-
   const debouncedNavigate = useRef(
     debounce((query: string) => {
-      if (!isHomePage) {
-        if (query.trim()) {
-          navigate(
-            `/search?roomId=${roomId}&query=${encodeURIComponent(
-              query.trim()
-            )}&karaoke=${isKaraoke}`
-          );
-        } else {
-          navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
-        }
+      if (query.trim()) {
+        navigate(
+          `/search?roomId=${roomId}&query=${encodeURIComponent(
+            query.trim()
+          )}&karaoke=${isKaraoke}`
+        );
+      } else if (isSearchPage) {
+        navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
+      } else if (!isHomePage) {
+        // Chỉ chuyển hướng khi không ở trang chủ và không có query
+        navigate(`/search?roomId=${roomId}&karaoke=${isKaraoke}`);
       }
-    }, 600)
+    }, 1000)
   ).current;
 
-  // Effect to trigger navigation when searchTerm changes
+  // Effect to trigger navigation when isKaraoke changes
   useEffect(() => {
-    if (!isHomePage) {
-      debouncedNavigate(searchTerm);
+    if (isSearchPage && searchTerm) {
+      navigate(
+        `/search?roomId=${roomId}&query=${encodeURIComponent(
+          searchTerm.trim()
+        )}&karaoke=${isKaraoke}`
+      );
     }
+  }, [isKaraoke, roomId, isSearchPage, searchTerm, navigate]);
 
+  // Cancel debounced function on unmount
+  useEffect(() => {
     return () => {
       debouncedNavigate.cancel();
     };
-  }, [searchTerm, isKaraoke, roomId, debouncedNavigate, isHomePage]);
+  }, [debouncedNavigate]);
 
   // Query cho auto complete suggestions with longer debounce
   const { data: songNameSuggestions } = useSongName(searchTerm, {
