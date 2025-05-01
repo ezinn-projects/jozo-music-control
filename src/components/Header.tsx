@@ -12,6 +12,7 @@ import debounce from "lodash/debounce";
 
 const Header: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [isKaraoke, setIsKaraoke] = useState<boolean>(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,9 +34,21 @@ const Header: React.FC = () => {
     // Only update if the value is different to avoid input jumps
     if (query !== searchTerm) {
       setSearchTerm(query);
+      setDebouncedSearchTerm(query);
     }
     setIsKaraoke(karaoke === "true" ? true : false);
   }, [location.search]);
+
+  // Debounce search term for API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchTerm]);
 
   const isSearchPage = location.pathname.includes("/search");
   const isHomePage = location.pathname === "/" || location.pathname === "";
@@ -105,13 +118,14 @@ const Header: React.FC = () => {
   }, [debouncedNavigate]);
 
   // Query cho auto complete suggestions with longer debounce
-  const { data: songNameSuggestions } = useSongName(searchTerm, {
-    enabled: showSuggestions && searchTerm.length >= 2,
+  const { data: songNameSuggestions } = useSongName(debouncedSearchTerm, {
+    enabled: showSuggestions && debouncedSearchTerm.length >= 2,
   });
 
   const handleSelectSuggestion = (suggestion: string) => {
     setShowSuggestions(false);
     setSearchTerm(suggestion);
+    setDebouncedSearchTerm(suggestion);
 
     // Navigate immediately for suggestion selection (no debounce)
     navigate(
@@ -123,6 +137,7 @@ const Header: React.FC = () => {
 
   const handleClearSearch = () => {
     setSearchTerm("");
+    setDebouncedSearchTerm("");
     setShowSuggestions(false);
     queryClient.removeQueries({ queryKey: ["songName"] });
 
