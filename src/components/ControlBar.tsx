@@ -40,7 +40,8 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
 
   const { data: queueData, refetch } = useQueueQuery();
 
-  const { mutate: playNextSong } = usePlayNextSong();
+  const { mutate: playNextSong, isPending: isNextSongPending } =
+    usePlayNextSong();
 
   const duration = queueData?.result.nowPlaying?.duration || 0;
 
@@ -200,6 +201,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
     queueData?.result?.queue?.length,
     queryClient,
     duration,
+    isNextSongPending,
   ]);
 
   const handlePlayback = () => {
@@ -276,20 +278,27 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
 
   const nowPlaying = queueData?.result.nowPlaying?.video_id;
 
-  const handleNextSong = () => {
-    socketRef.current?.emit("remove_current_song", { roomId });
-    playNextSong(
-      { roomId },
-      {
-        onSuccess: () => {
-          socketRef.current?.emit("next_song", { roomId });
-          socketRef.current?.emit("get_now_playing", { roomId });
-          setCurrentTime(0);
-          setIsPlaying(true);
-        },
+  const handleNextSong = useCallback(
+    debounce(() => {
+      if (isNextSongPending || !queueData?.result?.queue?.length) {
+        return;
       }
-    );
-  };
+
+      socketRef.current?.emit("remove_current_song", { roomId });
+      playNextSong(
+        { roomId },
+        {
+          onSuccess: () => {
+            socketRef.current?.emit("next_song", { roomId });
+            socketRef.current?.emit("get_now_playing", { roomId });
+            setCurrentTime(0);
+            setIsPlaying(true);
+          },
+        }
+      );
+    }, 500),
+    [playNextSong, roomId, queueData?.result?.queue?.length, isNextSongPending]
+  );
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = Number(e.target.value);
@@ -342,14 +351,21 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
             </button>
             <button
               onClick={handleNextSong}
-              disabled={!nowPlaying || !queueData?.result?.queue?.length}
+              disabled={
+                !nowPlaying ||
+                !queueData?.result?.queue?.length ||
+                isNextSongPending
+              }
               className={
-                !nowPlaying || !queueData?.result?.queue?.length
+                !nowPlaying ||
+                !queueData?.result?.queue?.length ||
+                isNextSongPending
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:opacity-80"
               }
             >
               <ForwardIcon />
+              {isNextSongPending && <span className="ml-1">...</span>}
             </button>
           </div>
 
