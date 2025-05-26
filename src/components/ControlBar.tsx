@@ -53,15 +53,19 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       transports: ["websocket"],
     });
 
-    socketRef.current.on("time_updated", (data: any) => {
-      if (!isDragging) {
-        const newTime = data.currentTime || 0;
+    // Debug log
+    console.log("Duration và thời gian hiện tại:", { duration, currentTime });
 
-        // Kiểm tra khi video gần kết thúc
-        if (duration - data.currentTime <= 1.5) {
-          console.log("Video sắp kết thúc!");
+    // Theo dõi thời gian hiện tại và kiểm tra nếu gần hết bài
+    const checkEndOfSong = () => {
+      if (isPlaying && duration > 0 && currentTime > 0) {
+        const timeRemaining = duration - currentTime;
+        console.log(`Time remaining: ${timeRemaining.toFixed(2)}s`);
 
-          if (queueData?.result?.queue?.length) {
+        if (timeRemaining <= 1.5) {
+          console.log("Video sắp kết thúc!", { duration, currentTime });
+
+          if (queueData?.result?.queue?.length && !isNextSongPending) {
             console.log("Còn bài trong queue, chuyển bài tiếp theo");
             socketRef.current?.emit("remove_current_song", { roomId });
             refetch();
@@ -79,7 +83,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
                 },
               }
             );
-          } else {
+          } else if (!queueData?.result?.queue?.length) {
             console.log("Không còn bài trong queue, kết thúc phát nhạc");
 
             // Cập nhật trạng thái local trước
@@ -108,8 +112,16 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
             setCurrentTime(0);
             setIsPlaying(false);
           }
-          return;
         }
+      }
+    };
+
+    // Kiểm tra mỗi 1 giây
+    const intervalId = setInterval(checkEndOfSong, 1000);
+
+    socketRef.current.on("time_updated", (data: any) => {
+      if (!isDragging) {
+        const newTime = data.currentTime || 0;
 
         // Chỉ cập nhật currentTime khi:
         // 1. Sự khác biệt thời gian đủ lớn (>0.5s)
@@ -192,6 +204,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
     });
 
     return () => {
+      clearInterval(intervalId);
       socketRef.current?.disconnect();
     };
   }, [
@@ -202,6 +215,9 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
     queryClient,
     duration,
     isNextSongPending,
+    currentTime,
+    isPlaying,
+    refetch,
   ]);
 
   const handlePlayback = () => {
@@ -265,7 +281,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   };
 
   const formatTime = (seconds: number): string => {
-    if (!queueData?.result.nowPlaying) return "0:00";
+    if (isNaN(seconds) || seconds < 0) return "0:00";
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
