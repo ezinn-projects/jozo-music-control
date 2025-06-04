@@ -26,7 +26,7 @@ const Home: React.FC = () => {
     queryKey: ["trendingVideos1"],
     queryFn: () =>
       searchSongs(
-        "#karaoke #music #nhạc HieuThuHai Sơn Tùng M-TP Den Vau tlinh MONO WEAN AMEE Hoàng Thùy Linh",
+        "#karaoke #beat #nhạc trẻ HieuThuHai Sơn Tùng M-TP Den Vau tlinh MONO WEAN AMEE Hoàng Thùy Linh",
         roomId
       ),
     staleTime: 1000 * 60 * 30, // Cache 30 phút
