@@ -36,6 +36,9 @@ const Header: React.FC = () => {
     showSuggestions: false,
   });
 
+  // Dùng một ref để theo dõi các khoảng trắng
+  const inputValueRef = useRef<string>("");
+
   const [isKaraoke, setIsKaraoke] = useState<boolean>(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,6 +68,8 @@ const Header: React.FC = () => {
         term: query,
         debouncedTerm: query,
       }));
+      // Cập nhật giá trị trong inputValueRef
+      inputValueRef.current = query;
     }
 
     setIsKaraoke(karaoke === "true");
@@ -92,11 +97,13 @@ const Header: React.FC = () => {
   const debouncedNavigate = useMemo(
     () =>
       debounce((query: string) => {
-        const trimmedQuery = query.trim();
+        // KHÔNG sử dụng trim() để giữ lại khoảng trắng ở cuối
         const baseUrl = `/search?roomId=${roomId}&karaoke=${isKaraoke}`;
 
-        if (trimmedQuery) {
-          navigate(`${baseUrl}&query=${encodeURIComponent(trimmedQuery)}`);
+        if (query.trim().length > 0) {
+          // Chỉ kiểm tra nếu query có ký tự khác khoảng trắng
+          // Giữ lại khoảng trắng ở cuối bằng cách dùng trực tiếp query mà không trim()
+          navigate(`${baseUrl}&query=${encodeURIComponent(query)}`);
         } else if (isSearchPage) {
           navigate(baseUrl);
         } else if (!isHomePage) {
@@ -136,9 +143,10 @@ const Header: React.FC = () => {
   useEffect(() => {
     if (isSearchPage && searchState.term) {
       const baseUrl = `/search?roomId=${roomId}`;
+      // Giữ lại khoảng trắng ở cuối bằng cách dùng trực tiếp searchState.term mà không trim()
       navigate(
         `${baseUrl}&query=${encodeURIComponent(
-          searchState.term.trim()
+          searchState.term
         )}&karaoke=${isKaraoke}`
       );
     }
@@ -146,14 +154,22 @@ const Header: React.FC = () => {
 
   // Handle input change với cách tiếp cận tối ưu hơn
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Lấy giá trị trực tiếp từ input để đảm bảo khoảng trắng được giữ nguyên
     const value = e.target.value;
+
+    // Log giá trị để debug
+    console.log(`Input value: "${value}", length: ${value.length}`);
+
+    // Lưu giá trị thực tế vào ref
+    inputValueRef.current = value;
+
     setSearchState((prev) => ({
       ...prev,
       term: value,
       showSuggestions: true,
     }));
 
-    // Trigger navigation with debounce
+    // Trigger navigation with debounce - không làm thay đổi giá trị hiển thị
     debouncedNavigate(value);
   };
 
@@ -170,7 +186,11 @@ const Header: React.FC = () => {
       showSuggestions: false,
     });
 
+    // Cập nhật giá trị trong inputValueRef
+    inputValueRef.current = suggestion;
+
     // Navigate immediately for suggestion selection (no debounce)
+    // Đối với suggestion, sử dụng trim() là phù hợp vì đây là text từ gợi ý
     navigate(
       `/search?roomId=${roomId}&query=${encodeURIComponent(
         suggestion
@@ -184,6 +204,9 @@ const Header: React.FC = () => {
       debouncedTerm: "",
       showSuggestions: false,
     });
+
+    // Cập nhật giá trị trong inputValueRef
+    inputValueRef.current = "";
 
     queryClient.removeQueries({ queryKey: ["songName"] });
 
@@ -241,7 +264,7 @@ const Header: React.FC = () => {
             ref={inputRef}
             type="text"
             placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
-            value={searchState.term}
+            value={inputValueRef.current}
             onChange={handleInputChange}
             onFocus={() => {
               setSearchState((prev) => ({ ...prev, showSuggestions: true }));
@@ -327,7 +350,7 @@ const Header: React.FC = () => {
               if (isSearchPage) {
                 navigate(
                   `/search?query=${encodeURIComponent(
-                    searchState.term.trim()
+                    searchState.term
                   )}&karaoke=${!isKaraoke}&roomId=${roomId}`
                 );
               }
