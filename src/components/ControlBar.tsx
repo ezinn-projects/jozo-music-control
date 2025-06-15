@@ -53,20 +53,14 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       transports: ["websocket"],
     });
 
-    // Debug log
-    console.log("Duration và thời gian hiện tại:", { duration, currentTime });
-
     // Theo dõi thời gian hiện tại và kiểm tra nếu gần hết bài
     const checkEndOfSong = () => {
       if (isPlaying && duration > 0 && currentTime > 0) {
         const timeRemaining = duration - currentTime;
-        console.log(`Time remaining: ${timeRemaining.toFixed(2)}s`);
 
-        if (timeRemaining <= 1.5) {
-          console.log("Video sắp kết thúc!", { duration, currentTime });
-
+        // Increase threshold to 3 seconds to account for the 3-second interval
+        if (timeRemaining <= 3) {
           if (queueData?.result?.queue?.length && !isNextSongPending) {
-            console.log("Còn bài trong queue, chuyển bài tiếp theo");
             socketRef.current?.emit("remove_current_song", { roomId });
             refetch();
 
@@ -84,7 +78,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
               }
             );
           } else if (!queueData?.result?.queue?.length) {
-            console.log("Không còn bài trong queue, kết thúc phát nhạc");
+            // console.log("Không còn bài trong queue, kết thúc phát nhạc");
 
             // Cập nhật trạng thái local trước
             queryClient.setQueryData(

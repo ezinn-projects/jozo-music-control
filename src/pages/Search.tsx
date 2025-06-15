@@ -91,14 +91,15 @@ const SearchPage: React.FC = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["searchResults", processedQuery, karaoke],
+    queryKey: ["searchResults", processedQuery.toLowerCase().trim(), karaoke],
     queryFn: () => {
-      const isEnglishQuery = /^[a-zA-Z\s]+$/.test(processedQuery.trim());
+      const normalizedQuery = processedQuery.toLowerCase().trim();
+      const isEnglishQuery = /^[a-zA-Z\s]+$/.test(normalizedQuery);
       const musicKeywords = isEnglishQuery
-        ? `${processedQuery} ${
+        ? `${normalizedQuery} ${
             karaoke ? "karaoke beat #song #music" : "song #music"
           }`
-        : `${processedQuery} ${
+        : `${normalizedQuery} ${
             karaoke ? "nhạc beat #karaoke" : "bài hát nhạc #hat #music #nhac"
           }`;
       return searchSongs(musicKeywords, roomId || "");
