@@ -56,3 +56,42 @@ interface YouTubeThumbnail {
 }
 
 // type PlaybackState = "play" | "pause";
+
+interface FnbCategory {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+}
+
+interface FnbItem {
+  _id: string;
+  name: string;
+  price: string;
+  description?: string;
+  image?: string;
+  category: string;
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+interface FnbMenu {
+  categories: FnbCategory[];
+  items: FnbItem[];
+}
+
+interface OrderItem {
+  itemId: string;
+  quantity: number;
+  notes?: string;
+}
+
+interface Order {
+  id?: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status?: "pending" | "processing" | "completed" | "cancelled";
+  createdAt?: string;
+}

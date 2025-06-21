@@ -3,6 +3,7 @@ import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
 import QRCodeScreen from "@/pages/QRCode";
 import Search from "@/pages/Search";
+import FnbOrder from "@/pages/FnbOrder";
 import { RouteObject } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -15,6 +16,7 @@ const routes: RouteObject[] = [
         children: [
           { path: "/", element: <Home /> }, // Trang Home
           { path: "/search", element: <Search /> }, // Trang Search
+          { path: "/fnb", element: <FnbOrder /> }, // Trang FnB Order
         ],
       },
       { path: "/qr-code", element: <QRCodeScreen /> },

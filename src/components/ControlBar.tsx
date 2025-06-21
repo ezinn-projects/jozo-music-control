@@ -5,9 +5,9 @@ import PlayIcon from "@/assets/icons/PlayIcon";
 import { PlaybackState } from "@/constant/enum";
 import { usePlayNextSong } from "@/hooks/useQueueMutations";
 import { useQueueQuery } from "@/hooks/useQueueQuery";
+import { useSocket } from "@/contexts/SocketContext";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import io, { Socket } from "socket.io-client";
 import { debounce } from "lodash";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -32,7 +32,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const socketRef = useRef<typeof Socket | null>(null);
+  const { socket } = useSocket(); // Use shared socket from context
   const [params] = useSearchParams();
   const roomId = params.get("roomId") || "";
   const lastTimeUpdateRef = useRef<number>(0);
@@ -47,28 +47,47 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
 
   const queryClient = useQueryClient();
 
+  // Use refs for frequently changing values to avoid useEffect re-runs
+  const isPlayingRef = useRef(isPlaying);
+  const currentTimeRef = useRef(currentTime);
+  const durationRef = useRef(duration);
+
+  // Update refs when values change
   useEffect(() => {
-    socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
-      query: { roomId },
-      transports: ["websocket"],
-    });
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  useEffect(() => {
+    durationRef.current = duration;
+  }, [duration]);
+
+  useEffect(() => {
+    if (!socket) return;
 
     // Theo dõi thời gian hiện tại và kiểm tra nếu gần hết bài
     const checkEndOfSong = () => {
-      if (isPlaying && duration > 0 && currentTime > 0) {
-        const timeRemaining = duration - currentTime;
+      const currentIsPlaying = isPlayingRef.current;
+      const currentCurrentTime = currentTimeRef.current;
+      const currentDuration = durationRef.current;
+
+      if (currentIsPlaying && currentDuration > 0 && currentCurrentTime > 0) {
+        const timeRemaining = currentDuration - currentCurrentTime;
 
         // Increase threshold to 3 seconds to account for the 3-second interval
         if (timeRemaining <= 3) {
           if (queueData?.result?.queue?.length && !isNextSongPending) {
-            socketRef.current?.emit("remove_current_song", { roomId });
+            socket?.emit("remove_current_song", { roomId });
             refetch();
 
             playNextSong(
               { roomId },
               {
                 onSuccess: () => {
-                  socketRef.current?.emit("next_song", { roomId });
+                  socket?.emit("next_song", { roomId });
                   setCurrentTime(0);
                   setIsPlaying(true);
                   queryClient.invalidateQueries({
@@ -98,9 +117,9 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
             );
 
             // Sau đó emit các sự kiện
-            socketRef.current?.emit("remove_current_song", { roomId });
-            socketRef.current?.emit("clear_room_data", { roomId });
-            socketRef.current?.emit("song_ended", { roomId });
+            socket?.emit("remove_current_song", { roomId });
+            socket?.emit("clear_room_data", { roomId });
+            socket?.emit("song_ended", { roomId });
 
             // Reset trạng thái phát nhạc
             setCurrentTime(0);
@@ -113,16 +132,18 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
     // Kiểm tra mỗi 1 giây
     const intervalId = setInterval(checkEndOfSong, 1000);
 
-    socketRef.current.on("time_updated", (data: any) => {
+    socket.on("time_updated", (data: any) => {
       if (!isDragging) {
         const newTime = data.currentTime || 0;
+        const currentCurrentTime = currentTimeRef.current;
+        const currentIsPlaying = isPlayingRef.current;
 
         // Chỉ cập nhật currentTime khi:
         // 1. Sự khác biệt thời gian đủ lớn (>0.5s)
         // 2. Hoặc khi đang không phát (để đồng bộ chính xác vị trí khi pause)
         if (
-          !isPlaying ||
-          Math.abs(newTime - currentTime) > 0.5 ||
+          !currentIsPlaying ||
+          Math.abs(newTime - currentCurrentTime) > 0.5 ||
           Math.abs(newTime - lastTimeUpdateRef.current) > 0.5
         ) {
           setCurrentTime(newTime);
@@ -131,17 +152,19 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       }
     });
 
-    socketRef.current.on("video_event", (data: any) => {
+    socket.on("video_event", (data: any) => {
+      const currentCurrentTime = currentTimeRef.current;
+
       if (data.event === PlaybackState.PLAY) {
         setIsPlaying(true);
         // Chỉ cập nhật currentTime nếu có sự khác biệt đáng kể
-        if (Math.abs(data.currentTime - currentTime) > 0.5) {
+        if (Math.abs(data.currentTime - currentCurrentTime) > 0.5) {
           setCurrentTime(data.currentTime || 0);
         }
       } else if (data.event === PlaybackState.PAUSE) {
         setIsPlaying(false);
         // Chỉ cập nhật currentTime nếu có sự khác biệt đáng kể
-        if (Math.abs(data.currentTime - currentTime) > 0.5) {
+        if (Math.abs(data.currentTime - currentCurrentTime) > 0.5) {
           setCurrentTime(data.currentTime || 0);
         }
       } else if (data.event === PlaybackState.SEEK) {
@@ -149,22 +172,22 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       }
     });
 
-    socketRef.current.on("play_song", (data: any) => {
+    socket.on("play_song", (data: any) => {
       if (data) {
         setIsPlaying(true);
         setCurrentTime(0);
       }
     });
 
-    socketRef.current.on("now_playing_cleared", () => {
+    socket.on("now_playing_cleared", () => {
       setIsPlaying(false);
       setCurrentTime(0);
     });
 
-    socketRef.current.on("song_ended", () => {
+    socket.on("song_ended", () => {
       // Chỉ xóa now playing và reset trạng thái khi không còn bài hát nào trong queue
       if (!queueData?.result?.queue?.length) {
-        socketRef.current?.emit("song_ended", {
+        socket?.emit("song_ended", {
           roomId,
         });
 
@@ -193,26 +216,30 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
       }
     });
 
-    socketRef.current.on("volumeChange", (newVolume: number) => {
+    socket.on("volumeChange", (newVolume: number) => {
       setVolume(newVolume);
     });
 
     return () => {
       clearInterval(intervalId);
-      socketRef.current?.disconnect();
+      // Remove event listeners instead of disconnecting socket
+      socket.off("time_updated");
+      socket.off("video_event");
+      socket.off("play_song");
+      socket.off("now_playing_cleared");
+      socket.off("song_ended");
+      socket.off("volumeChange");
     };
   }, [
+    socket,
     isDragging,
     roomId,
     playNextSong,
     queueData?.result?.queue?.length,
     queryClient,
-    duration,
     isNextSongPending,
-    currentTime,
-    isPlaying,
     refetch,
-  ]);
+  ]); // Removed currentTime, isPlaying, and duration from dependencies
 
   const handlePlayback = () => {
     if (!queueData?.result.nowPlaying) return;
@@ -234,8 +261,8 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
 
     console.log("time", time);
 
-    if (socketRef.current) {
-      socketRef.current.emit("video_event", {
+    if (socket) {
+      socket.emit("video_event", {
         roomId,
         videoId: queueData?.result.nowPlaying?.video_id,
         event: PlaybackState.SEEK,
@@ -246,8 +273,8 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
 
   const debouncedSeek = useCallback(
     debounce((time: number) => {
-      if (socketRef.current) {
-        socketRef.current.emit("video_event", {
+      if (socket) {
+        socket.emit("video_event", {
           roomId,
           videoId: queueData?.result.nowPlaying?.video_id,
           event: PlaybackState.SEEK,
@@ -255,7 +282,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         });
       }
     }, 200),
-    [socketRef, roomId, queueData]
+    [socket, roomId, queueData]
   );
 
   const handleDrag = (value: number) => {
@@ -264,8 +291,8 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
   };
 
   const sendPlaybackEvent = (action: PlaybackState) => {
-    if (socketRef.current && queueData?.result.nowPlaying) {
-      socketRef.current.emit("video_event", {
+    if (socket && queueData?.result.nowPlaying) {
+      socket.emit("video_event", {
         roomId,
         videoId: queueData.result.nowPlaying.video_id,
         event: action,
@@ -294,13 +321,13 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
         return;
       }
 
-      socketRef.current?.emit("remove_current_song", { roomId });
+      socket?.emit("remove_current_song", { roomId });
       playNextSong(
         { roomId },
         {
           onSuccess: () => {
-            socketRef.current?.emit("next_song", { roomId });
-            socketRef.current?.emit("get_now_playing", { roomId });
+            socket?.emit("next_song", { roomId });
+            socket?.emit("get_now_playing", { roomId });
             setCurrentTime(0);
             setIsPlaying(true);
           },
@@ -315,7 +342,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
     setVolume(newVolume);
 
     // Chỉ gửi giá trị volume trực tiếp vì socket đã được gán vào room
-    socketRef.current?.emit("adjustVolume", newVolume);
+    socket?.emit("adjustVolume", newVolume);
   };
 
   return (

@@ -6,6 +6,7 @@ import {
   usePlayChosenSong,
 } from "@/hooks/useQueueMutations";
 import { useQueueQuery } from "@/hooks/useQueueQuery";
+import { useSocket } from "@/contexts/SocketContext";
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
@@ -19,8 +20,6 @@ import { CSS } from "@dnd-kit/utilities";
 import DragHandleIcon from "@/assets/icons/DragHandleIcon";
 import ReactDOM from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import io from "socket.io-client";
-// import DragHandleIcon from "@/assets/icons/DragHandleIcon";
 
 interface QueueSidebarProps {
   isOpen: boolean;
@@ -127,20 +126,9 @@ const SortableQueueItem = ({
   const [showPlayPopup, setShowPlayPopup] = useState(false);
   const [searchParams] = useSearchParams();
   const roomId = searchParams.get("roomId") || "";
-  const socketRef = React.useRef<ReturnType<typeof io> | null>(null);
+  const { socket } = useSocket();
   const queryClient = useQueryClient();
   const { mutate: playChosenSong } = usePlayChosenSong();
-
-  useEffect(() => {
-    socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
-      query: { roomId },
-      transports: ["websocket"],
-    });
-
-    return () => {
-      socketRef.current?.disconnect();
-    };
-  }, [roomId]);
 
   const {
     attributes,
@@ -181,8 +169,8 @@ const SortableQueueItem = ({
       },
       {
         onSuccess: () => {
-          socketRef.current?.emit("next_song", { roomId });
-          socketRef.current?.emit("get_now_playing", { roomId });
+          socket?.emit("next_song", { roomId });
+          socket?.emit("get_now_playing", { roomId });
           queryClient.invalidateQueries({
             queryKey: ["queue", roomId],
           });
