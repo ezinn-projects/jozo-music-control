@@ -171,13 +171,12 @@ const Home: React.FC = () => {
       author: "MEOW MUSIC",
     },
     {
-      video_id: "jjBEffDzr1A",
-      title:
-        "Karaoke Tràn Bộ Nhớ - Dương Domic - Karaoke Nhạc Trẻ Hay Nhất 2024",
-      duration: 209,
-      url: "https://youtube.com/watch?v=jjBEffDzr1A",
-      thumbnail: "https://i.ytimg.com/vi/jjBEffDzr1A/hq720.jpg",
-      author: "MEOW MUSIC",
+      video_id: "LvAEgcdbgbc",
+      title: "KARAOKE | Dương Domic - Mất Kết Nối | EP 'Dữ Liệu Quý'",
+      duration: 202,
+      url: "https://youtube.com/watch?v=LvAEgcdbgbc",
+      thumbnail: "https://i.ytimg.com/vi/LvAEgcdbgbc/hq720.jpg",
+      author: "SInger",
     },
     {
       video_id: "AoIIyiZIoIw",
