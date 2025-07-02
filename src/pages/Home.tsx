@@ -31,28 +31,13 @@ const Home: React.FC = () => {
   // Hardcoded trending videos
   const trendingVideos = [
     {
-      video_id: "VCZXHBXIUK0",
-      title: "Drama By G-DRAGON (Karaoke Version With Backing Vocals)",
-      duration: 231,
-      url: "https://youtube.com/watch?v=VCZXHBXIUK0",
-      thumbnail: "https://i.ytimg.com/vi/VCZXHBXIUK0/hq720.jpg",
-      author: "Global Karaoke Vibez",
-    },
-    {
-      video_id: "mFctG6MVgv0",
-      title: "G-Dragon - Crooked Karaoke Lyrics Video",
-      duration: 226,
-      url: "https://youtube.com/watch?v=mFctG6MVgv0",
-      thumbnail: "https://i.ytimg.com/vi/mFctG6MVgv0/hq720.jpg",
-      author: "aristokrat",
-    },
-    {
-      video_id: "K8392rnBRXM",
-      title: "[KARAOKE] Haru Haru - Bigbang (Giữ giọng rap) Karaoke",
-      duration: 257,
-      url: "https://youtube.com/watch?v=K8392rnBRXM",
-      thumbnail: "https://i.ytimg.com/vi/K8392rnBRXM/hq720.jpg",
-      author: "Zhan Karaoke",
+      video_id: "Ur0oCJClQOc",
+      title:
+        "[BEAT] KHÔNG SAO MÀ EM ĐÂY RỒI | SUNI HẠ LINH ft. Lou Hoàng | INSTRUMENTAL/KARAOKE",
+      duration: 268,
+      url: "https://youtube.com/watch?v=Ur0oCJClQOc",
+      thumbnail: "https://i.ytimg.com/vi/Ur0oCJClQOc/hq720.jpg",
+      author: "SUNI",
     },
     {
       video_id: "dEnguHPmv-c",
@@ -71,12 +56,72 @@ const Home: React.FC = () => {
       author: "TDH",
     },
     {
+      video_id: "AoIIyiZIoIw",
+      title: "Trình - Karaoke (Beat) Hiếu Thứ Hai",
+      duration: 277,
+      url: "https://youtube.com/watch?v=AoIIyiZIoIw",
+      thumbnail: "https://i.ytimg.com/vi/AoIIyiZIoIw/hq720.jpg",
+      author: "BiiMex Beat",
+    },
+    {
+      video_id: "HmWnsR60PsU",
+      title: "Karaoke CỨ ĐỂ ANH TA RỜI ĐI - Anh Trai Say 2 | Beat Chuẩn",
+      duration: 269,
+      url: "https://youtube.com/watch?v=HmWnsR60PsU",
+      thumbnail: "https://i.ytimg.com/vi/HmWnsR60PsU/hq720.jpg",
+      author: "SFC V-pop",
+    },
+    {
+      video_id: "6uuN1eG72E8",
+      title:
+        "[Karaoke Beat] REGRET - LÂM BẢO NGỌC, QUÂN A.P, QUANG TRUNG, ALI HOÀNG DƯƠNG, PHÁP KIỀU (Beat Chuẩn)",
+      duration: 253,
+      url: "https://youtube.com/watch?v=6uuN1eG72E8",
+      thumbnail: "https://i.ytimg.com/vi/6uuN1eG72E8/hq720.jpg",
+      author: "Hoàng Anh Potatoes",
+    },
+    {
+      video_id: "FDdqvu0dpH8",
+      title:
+        "Cơn Mưa Tình Yêu - Karaoke - Song Ca - Hà Anh Tuấn ft Phương Linh",
+      duration: 292,
+      url: "https://youtube.com/watch?v=FDdqvu0dpH8",
+      thumbnail: "https://i.ytimg.com/vi/FDdqvu0dpH8/hq720.jpg",
+      author: "Yeah ! Smile",
+    },
+    {
       video_id: "oxa8z0Noh94",
       title: "KARAOKE | vạn vật như muốn ta bên nhau - Rio & 52Hz (Beat gốc)",
       duration: 186,
       url: "https://youtube.com/watch?v=oxa8z0Noh94",
       thumbnail: "https://i.ytimg.com/vi/oxa8z0Noh94/hq720.jpg",
       author: "TDH",
+    },
+    {
+      video_id: "oqjM7Rf6Sxg",
+      title: "Phía Sau Một Cô Gái Karaoke HD  Hiếu's Louis",
+      duration: 271,
+      url: "https://youtube.com/watch?v=oqjM7Rf6Sxg",
+      thumbnail: "https://i.ytimg.com/vi/oqjM7Rf6Sxg/hq720.jpg",
+      author: "Hiếu Nguyễn",
+    },
+    {
+      video_id: "MDLOZiUExRI",
+      title:
+        "[Karaoke Beat Tone Nam] KHÔNG ĐAU NỮA RỒI - 52Hz, Orange, Mỹ Mỹ, Châu Bùi, Pháp Kiều (Beat Có Bè)",
+      duration: 292,
+      url: "https://youtube.com/watch?v=MDLOZiUExRI",
+      thumbnail: "https://i.ytimg.com/vi/MDLOZiUExRI/hq720.jpg",
+      author: "Hoàng Anh Potatoes",
+    },
+    {
+      video_id: "0O5sOHNZVUM",
+      title:
+        "Rồi Em Sẽ Gặp Một Chàng Trai Khác | Karaoke Beat Gốc | HippoHappy",
+      duration: 305,
+      url: "https://youtube.com/watch?v=0O5sOHNZVUM",
+      thumbnail: "https://i.ytimg.com/vi/0O5sOHNZVUM/hq720.jpg",
+      author: "LuxKara Official",
     },
     {
       video_id: "1Nwr24KDV5w",
@@ -186,15 +231,7 @@ const Home: React.FC = () => {
       thumbnail: "https://i.ytimg.com/vi/AoIIyiZIoIw/hq720.jpg",
       author: "BiiMex Beat",
     },
-    {
-      video_id: "a1eRYInA7lo",
-      title:
-        "[KARAOKE] KIM PHÚT KIM GIỜ - Negav, Pháp Kiều, ISAAC, HIEUTHUHAI, HURRYKNG | Anh Trai Say Hi",
-      duration: 316,
-      url: "https://youtube.com/watch?v=a1eRYInA7lo",
-      thumbnail: "https://i.ytimg.com/vi/a1eRYInA7lo/hq720.jpg",
-      author: "HT Audio",
-    },
+
     {
       video_id: "1PHw9fglz-M",
       title:
@@ -238,6 +275,15 @@ const Home: React.FC = () => {
       url: "https://youtube.com/watch?v=wt1agg-bd2k",
       thumbnail: "https://i.ytimg.com/vi/wt1agg-bd2k/hq720.jpg",
       author: "14 Casper",
+    },
+    {
+      video_id: "MHGiBATIxyM",
+      title:
+        "[Karaoke Beat] EASIER - MAIQUINN, Ngô Lan Hương, Muộii, Đào Tử A1J, Saabirose (Beat Có Bè)",
+      duration: 199,
+      url: "https://youtube.com/watch?v=MHGiBATIxyM",
+      thumbnail: "https://i.ytimg.com/vi/MHGiBATIxyM/hq720.jpg",
+      author: "Hoàng Anh Potatoes",
     },
     {
       video_id: "-l9LmjVXiwA",
@@ -287,6 +333,38 @@ const Home: React.FC = () => {
       url: "https://youtube.com/watch?v=D1wW7Pff6B0",
       thumbnail: "https://i.ytimg.com/vi/D1wW7Pff6B0/hqdefault.jpg",
       author: "Vlog Karaoke",
+    },
+    {
+      video_id: "iOxvOlCyaVM",
+      title: "Ghé Qua - Dick x PC x Tofu | Karaoke.",
+      duration: 235,
+      url: "https://youtube.com/watch?v=iOxvOlCyaVM",
+      thumbnail: "https://i.ytimg.com/vi/iOxvOlCyaVM/hq720.jpg",
+      author: "Đức Studio",
+    },
+    {
+      video_id: "hyB4iyq2tmw",
+      title: "Jessie J ft. B.o.B - Price Tag (Karaoke Version)",
+      duration: 246,
+      url: "https://youtube.com/watch?v=hyB4iyq2tmw",
+      thumbnail: "https://i.ytimg.com/vi/hyB4iyq2tmw/hqdefault.jpg",
+      author: "Sing King",
+    },
+    {
+      video_id: "ODEN6ICWr0g",
+      title: "I do - 911 Band - Karaoke tiếng Anh",
+      duration: 201,
+      url: "https://youtube.com/watch?v=ODEN6ICWr0g",
+      thumbnail: "https://i.ytimg.com/vi/ODEN6ICWr0g/hq720.jpg",
+      author: "Key Means Online English 1 Kèm 1",
+    },
+    {
+      video_id: "fZyW-T0w0X4",
+      title: "BEAUTIFUL IN WHITE - Westlife (HD Karaoke)",
+      duration: 250,
+      url: "https://youtube.com/watch?v=fZyW-T0w0X4",
+      thumbnail: "https://i.ytimg.com/vi/fZyW-T0w0X4/hq720.jpg",
+      author: "Atomic Karaoke... ",
     },
   ];
 
