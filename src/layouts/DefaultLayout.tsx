@@ -3,6 +3,9 @@ import { Outlet } from "react-router-dom";
 import Header from "@/components/Header";
 import ControlBar from "@/components/ControlBar";
 import QueueSidebar from "@/components/QueueSidebar";
+import { useImageBackground } from "@/contexts/ImageBackgroundContext";
+import { categoryImages } from "@/assets/images/categories";
+// import { categoryImages } from "@/assets/images/categories";
 // import { Socket } from "socket.io-client";
 
 const Layout: React.FC = () => {
@@ -26,6 +29,8 @@ const Layout: React.FC = () => {
     };
   }, []);
 
+  const { backgroundId } = useImageBackground();
+
   return (
     <div className="flex flex-col h-screen bg-black text-white">
       {/* Header */}
@@ -34,9 +39,17 @@ const Layout: React.FC = () => {
       {/* Queue Sidebar */}
 
       {/* Main */}
-      <main className="flex-1 relative overflow-hidden rounded-3xl bg-secondary">
-        {/* Blur Effect */}
-        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-lightpink/10 to-transparent z-10 pointer-events-none animate-breathing"></div>
+      <main
+        className="flex-1 relative overflow-hidden rounded-3xl bg-secondary"
+        style={{
+          backgroundImage: `url(${categoryImages[backgroundId]})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Background Overlay for Blur Effect */}
+        <div className="absolute inset-0 bg-black/40"></div>
 
         {/* Outlet Content */}
         <div className="relative z-20 h-full grid grid-cols-12">

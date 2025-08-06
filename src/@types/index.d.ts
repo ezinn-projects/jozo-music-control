@@ -9,6 +9,7 @@ interface Video {
   thumbnail: string;
   author: string;
   duration: number; // Nếu cần thời lượng
+  url?: string; // URL của video (optional)
 }
 
 interface YouTubeSearchResponse {

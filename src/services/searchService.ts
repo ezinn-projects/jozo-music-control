@@ -32,6 +32,7 @@ export const searchSongs = async (
           thumbnail: item.thumbnail || "",
           author: item.author || "Unknown Artist",
           duration: item.duration || 0,
+          url: item.url || `https://youtube.com/watch?v=${item.video_id}`,
         }))
       : [];
     // ... existing code ...
