@@ -186,7 +186,7 @@ const SortableQueueItem = ({
         ref={setNodeRef}
         style={style}
         {...attributes}
-        className={`flex items-center space-x-4 mb-4 relative rounded-lg p-2 transition-colors ${
+        className={`flex items-center space-x-4 mb-4 relative rounded-lg p-2 transition-colors${
           isDragging ? "shadow-lg" : ""
         }`}
       >
@@ -327,7 +327,7 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Waiting Queue - phần scroll */}
         <div
-          className="flex-1 min-h-0 overflow-y-auto"
+          className="flex-1 min-h-0 overflow-y-auto bg-black/50"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
           <div
@@ -348,7 +348,7 @@ const QueueSidebar: React.FC<QueueSidebarProps> = ({ isOpen, onClose }) => {
                   className="text-gray-400 hover:text-white flex items-center gap-x-3 p-2"
                   onClick={handleRemoveAll}
                 >
-                  xóa tất cả
+                  Xóa tất cả
                   <RemoveIcon />
                 </button>
               )}

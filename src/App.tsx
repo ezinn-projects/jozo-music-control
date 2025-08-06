@@ -1,11 +1,12 @@
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import RoutesWrapper from "@/routes/RoutesWrapper";
-import { TimerProvider } from "./contexts/TimerContext";
-import { SocketProvider } from "./contexts/SocketContext";
+import { TimerProvider } from "@/contexts/TimerContext";
+import { SocketProvider } from "@/contexts/SocketContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "@/components/ToastContainer";
+import { ImageBackgroundProvider } from "./contexts/ImageBackgroundContext";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -24,7 +25,9 @@ const App: React.FC = () => {
       <BrowserRouter>
         <SocketProvider>
           <TimerProvider>
-            <RoutesWrapper />
+            <ImageBackgroundProvider>
+              <RoutesWrapper />
+            </ImageBackgroundProvider>
           </TimerProvider>
         </SocketProvider>
       </BrowserRouter>
