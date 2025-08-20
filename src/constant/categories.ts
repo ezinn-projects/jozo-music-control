@@ -356,6 +356,100 @@ export const SHOW_CATEGORIES: CategoryData[] = [
     ],
   },
   {
+    id: CategoriesId.VIET_NAM_SONG,
+    image: categoryImages[CategoriesId.VIET_NAM_SONG],
+    name: "Quốc Khánh Việt Nam ",
+    videos: [
+      {
+        video_id: "E64QZrljm6c",
+        title: "[KARAOKE BEAT] VIỆT NAM TÔI - K-ICM X JACK | ICM STUDIO",
+        duration: 274,
+        url: "https://youtube.com/watch?v=E64QZrljm6c",
+        thumbnail: "https://i.ytimg.com/vi/E64QZrljm6c/hq720.jpg",
+        author: "ICM Studio",
+      },
+      {
+        video_id: "BBaaBNCk-jU",
+        title: "Karaoke Việt Nam Ơi - Minh Beta | Beat chuẩn",
+        duration: 187,
+        url: "https://youtube.com/watch?v=BBaaBNCk-jU",
+        thumbnail: "https://i.ytimg.com/vi/BBaaBNCk-jU/hq720.jpg",
+        author: "Minh Beta official",
+      },
+      {
+        video_id: "ivql1-T8-og",
+        title:
+          "[ SƠN TÙNG M-TP ] KARAOKE BEAT GỐC CÓ BÈ - TIẾN LÊN VIỆT NAM ƠI - LIVE GALA CỔ VŨ U23 VIETNAM 2018",
+        duration: 216,
+        url: "https://youtube.com/watch?v=ivql1-T8-og",
+        thumbnail: "https://i.ytimg.com/vi/ivql1-T8-og/hqdefault.jpg",
+        author: "Duy Max Official",
+      },
+      {
+        video_id: "Par5tw3a3lE",
+        title:
+          "Hào Khí Việt Nam Karaoke Tone Nam A#m ( Beat Phối Chuyên Nghiệp ) Trọng Hiếu",
+        duration: 274,
+        url: "https://youtube.com/watch?v=Par5tw3a3lE",
+        thumbnail: "https://i.ytimg.com/vi/Par5tw3a3lE/hq720.jpg",
+        author: "Hiếu Organ",
+      },
+      {
+        video_id: "mYpjfBw78qI",
+        title: "[KARAOKE] HELLO VIETNAM - Pham Quynh Anh | Original Beat",
+        duration: 210,
+        url: "https://youtube.com/watch?v=mYpjfBw78qI",
+        thumbnail: "https://i.ytimg.com/vi/mYpjfBw78qI/hq720.jpg",
+        author: "MiMi Karaoke",
+      },
+      {
+        video_id: "RwpPL9QNTDg",
+        title:
+          "NIỀM TIN CHIẾN THẮNG -[KARAOKE-6] - Beat MỸ TÂM-St:Lê Quang-Lời Ngoại: Mỹ Tâm",
+        duration: 281,
+        url: "https://youtube.com/watch?v=RwpPL9QNTDg",
+        thumbnail: "https://i.ytimg.com/vi/RwpPL9QNTDg/hqdefault.jpg",
+        author: "Julie Hương Hiệp Official",
+      },
+      {
+        video_id: "CjDpSYcImJc",
+        title:
+          "MỘT VÒNG VIỆT NAM (Around Viet Nam) - Tùng Dương | Karaoke Version",
+        duration: 244,
+        url: "https://youtube.com/watch?v=CjDpSYcImJc",
+        thumbnail: "https://i.ytimg.com/vi/CjDpSYcImJc/hqdefault.jpg",
+        author: "TUNG DUONG OFFICIAL",
+      },
+      {
+        video_id: "5VapRYaT5to",
+        title:
+          "KHÁT VỌNG TUỔI TRẺ (KARAOKE) - Tùng Dương (ST: Vũ Hoàng) | Beat Gốc Chuẩn",
+        duration: 275,
+        url: "https://youtube.com/watch?v=5VapRYaT5to",
+        thumbnail: "https://i.ytimg.com/vi/5VapRYaT5to/hq720.jpg",
+        author: "TUNG DUONG OFFICIAL",
+      },
+      {
+        video_id: "iTFrhbtQxyk",
+        title:
+          "[KARAOKE] VIỆT NAM -  TỰ HÀO TIẾP BƯỚC TƯƠNG LAI - TÙNG DƯƠNG x ‪NGUYỄN VĂN CHUNG",
+        duration: 215,
+        url: "https://youtube.com/watch?v=iTFrhbtQxyk",
+        thumbnail: "https://i.ytimg.com/vi/iTFrhbtQxyk/hqdefault.jpg",
+        author: "Trường Thanh",
+      },
+      {
+        video_id: "qZ5PlZvOpY4",
+        title:
+          "VIỆT NAM TRONG TÔI LÀ | YẾN LÊ | KARAOKE BEAT TONE NỮ | Máu đỏ da vàng tôi là người Việt Nam",
+        duration: 259,
+        url: "https://youtube.com/watch?v=qZ5PlZvOpY4",
+        thumbnail: "https://i.ytimg.com/vi/qZ5PlZvOpY4/hq720.jpg",
+        author: "Yến Lê Official",
+      },
+    ],
+  },
+  {
     id: CategoriesId.EM_XINH_SAY_HI,
     name: "Em Xinh Say Hi",
     image: categoryImages[CategoriesId.EM_XINH_SAY_HI],
