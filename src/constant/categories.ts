@@ -369,6 +369,15 @@ export const SHOW_CATEGORIES: CategoryData[] = [
         author: "ICM Studio",
       },
       {
+        video_id: "ip4nEBaMD8w",
+        title:
+          "Karaoke Viết Tiếp Câu Chuyện Hòa Bình (Beat) - Nguyễn Duyên Quỳnh",
+        duration: 305,
+        url: "https://youtube.com/watch?v=ip4nEBaMD8w",
+        thumbnail: "https://i.ytimg.com/vi/ip4nEBaMD8w/hq720.jpg",
+        author: "Nguyen Duyen Quynh Official",
+      },
+      {
         video_id: "BBaaBNCk-jU",
         title: "Karaoke Việt Nam Ơi - Minh Beta | Beat chuẩn",
         duration: 187,
