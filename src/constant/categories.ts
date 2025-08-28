@@ -369,6 +369,14 @@ export const SHOW_CATEGORIES: CategoryData[] = [
         author: "ICM Studio",
       },
       {
+        video_id: "uMNOxpqQ_08",
+        title: "KARAOKE | CÒN GÌ ĐẸP HƠN - Nguyễn Hùng (Beat gốc)",
+        duration: 283,
+        url: "https://youtube.com/watch?v=uMNOxpqQ_08",
+        thumbnail: "https://i.ytimg.com/vi/uMNOxpqQ_08/hq720.jpg",
+        author: "TDH",
+      },
+      {
         video_id: "ip4nEBaMD8w",
         title:
           "Karaoke Viết Tiếp Câu Chuyện Hòa Bình (Beat) - Nguyễn Duyên Quỳnh",
