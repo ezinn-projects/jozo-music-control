@@ -6,13 +6,23 @@ export const useFnbMutations = () => {
 
   // Mutation để đặt đơn hàng
   const submitOrder = useMutation({
-    mutationFn: async (order: Omit<Order, "id" | "createdAt" | "status">) => {
-      const response = await http.post<ApiResponse<Order>>("/orders", order);
+    mutationFn: async ({
+      payload,
+      roomId,
+    }: {
+      payload: CreateFnbOrderPayload;
+      roomId: string;
+    }) => {
+      const response = await http.post<ApiResponse<Order>>(
+        `/client/fnb/orders/room/${roomId}`,
+        payload
+      );
       return response.data.result;
     },
     onSuccess: () => {
       // Sau khi đặt hàng thành công, invalidate các query liên quan
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
     },
   });
 

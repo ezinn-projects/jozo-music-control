@@ -65,17 +65,38 @@ interface FnbCategory {
   image?: string;
 }
 
+interface FnbVariant {
+  _id: string;
+  name: string;
+  price: number;
+  image?: string;
+  inventory: {
+    quantity: number;
+    minStock?: number;
+    maxStock?: number;
+  };
+}
+
 interface FnbItem {
   _id: string;
   name: string;
-  price: string;
+  parentId?: string;
+  hasVariant: boolean;
+  price: number;
   description?: string;
   image?: string;
   category: string;
+  inventory?: {
+    quantity: number;
+    lastUpdated: string;
+  };
   createdAt?: string;
   createdBy?: string;
   updatedAt?: string;
   updatedBy?: string;
+  existingImage?: string;
+  quantity?: string;
+  variants?: string; // JSON string containing FnbVariant[]
 }
 
 interface FnbMenu {
@@ -85,8 +106,29 @@ interface FnbMenu {
 
 interface OrderItem {
   itemId: string;
+  category: string;
+  variantId?: string; // For items with variants
   quantity: number;
   notes?: string;
+}
+
+interface FnbOrder {
+  id: string;
+  roomId: string;
+  order: {
+    drinks: Record<string, number>;
+    snacks: Record<string, number>;
+  };
+  status: "pending" | "processing" | "completed" | "cancelled";
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface CreateFnbOrderPayload {
+  order: {
+    drinks: Record<string, number>; // { "itemId": quantity }
+    snacks: Record<string, number>; // { "itemId": quantity }
+  };
 }
 
 interface Order {

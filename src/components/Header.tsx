@@ -362,7 +362,7 @@ const Header: React.FC = () => {
       {/* Right: Contact with server */}
       <div className="flex items-center space-x-4">
         <button
-          className={isSearchPage ? "opacity-100" : "opacity-0"}
+          className={!isHomePage ? "opacity-100" : "opacity-0"}
           onClick={handleHomeNavigation}
         >
           <HomeIcon />

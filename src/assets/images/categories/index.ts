@@ -1,6 +1,6 @@
 import EXSH_LOGO from "./EXSH_logo_HTV2.webp";
 import ATSH_LOGO from "./AnhTraiSayHiOpening.jpg";
-import HOT_SONGS_LOGO from "./august-lettering-volumetric-letters-hand-made-vector-37451132.jpg";
+import HOT_SONGS_LOGO from "./hot-in-month.jpg";
 import SONG_CA_LOGO from "./50-bai-hat-song-ca-duoc-yeu-thich-1.jpg";
 import VIET_NAM_SONG_LOGO from "./vietnam-741.gif";
 

@@ -58,12 +58,12 @@ export const SHOW_CATEGORIES: CategoryData[] = [
         author: "TDH",
       },
       {
-        video_id: "5MzX5XZY0Ps",
-        title: "[ Karaoke ] Trình - HIEUTHUHAI (prod. by Kewtiie )",
-        duration: 278,
-        url: "https://youtube.com/watch?v=5MzX5XZY0Ps",
-        thumbnail: "https://i.ytimg.com/vi/5MzX5XZY0Ps/hq720.jpg",
-        author: "Karaoke Now",
+        video_id: "5FrOlD9rL8s",
+        title: "THIÊN LÝ ƠI - JACK J97 | KARAOKE BEAT GỐC",
+        duration: 221,
+        url: "https://youtube.com/watch?v=5FrOlD9rL8s",
+        thumbnail: "https://i.ytimg.com/vi/5FrOlD9rL8s/hq720.jpg",
+        author: "LuxKara",
       },
       {
         video_id: "HmWnsR60PsU",
@@ -228,13 +228,12 @@ export const SHOW_CATEGORIES: CategoryData[] = [
         author: "SInger",
       },
       {
-        video_id: "1PHw9fglz-M",
-        title:
-          "Nước Mắt Cá Sấu | HIEUTHUHAI | Karaoke Beat Gốc Chất Lượng Cao | Nhạc Sống Nguyên Cường",
-        duration: 227,
-        url: "https://youtube.com/watch?v=1PHw9fglz-M",
-        thumbnail: "https://i.ytimg.com/vi/1PHw9fglz-M/hq720.jpg",
-        author: "Karaoke Nguyên Cường",
+        video_id: "3Ug0w06Zm1w",
+        title: "[KARAOKE] RƠI TỰ DO - LyHan l ( BEAT CHUẨN )",
+        duration: 212,
+        url: "https://youtube.com/watch?v=3Ug0w06Zm1w",
+        thumbnail: "https://i.ytimg.com/vi/3Ug0w06Zm1w/hq720.jpg",
+        author: "NHL Entertainment",
       },
       {
         video_id: "y7YiSVSlCpM",

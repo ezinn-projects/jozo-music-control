@@ -419,7 +419,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
                   onMouseDown={handleDragStart}
                   onMouseUp={(e) => handleSeek(Number(e.currentTarget.value))}
                   onChange={(e) => handleDrag(Number(e.target.value))}
-                  className="absolute z-20 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2 
+                  className="absolute z-10 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2 
                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-lightpink [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-30 [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:duration-150
                     [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-lightpink [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:relative [&::-moz-range-thumb]:z-30 [&::-moz-range-thumb]:transition-all [&::-moz-range-thumb]:duration-150
                     [&::-ms-thumb]:appearance-none [&::-ms-thumb]:bg-lightpink [&::-ms-thumb]:w-4 [&::-ms-thumb]:h-4 [&::-ms-thumb]:rounded-full [&::-ms-thumb]:relative [&::-ms-thumb]:z-30 [&::-ms-thumb]:transition-all [&::-ms-thumb]:duration-150"
@@ -473,7 +473,7 @@ const ControlBar: React.FC<Props> = ({ onToggleQueue }: Props) => {
                 max="100"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="absolute z-20 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2
+                className="absolute z-10 w-full appearance-none bg-transparent h-2 cursor-pointer -translate-y-1/2
                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-lightpink [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-30
                     [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-lightpink [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:relative [&::-moz-range-thumb]:z-30"
               />

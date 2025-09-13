@@ -5,7 +5,9 @@ export const useFnbMenuQuery = () => {
   return useQuery({
     queryKey: ["fnbMenu"],
     queryFn: async () => {
-      const response = await http.get<ApiResponse<FnbItem[]>>("/fnb-menu");
+      const response = await http.get<ApiResponse<FnbItem[]>>(
+        "/fnb-menu-item/"
+      );
 
       // Tạo cấu trúc FnbMenu từ dữ liệu trả về
       const items = response.data.result;
