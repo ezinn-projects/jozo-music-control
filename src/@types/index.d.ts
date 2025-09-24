@@ -96,7 +96,7 @@ interface FnbItem {
   updatedBy?: string;
   existingImage?: string;
   quantity?: string;
-  variants?: string; // JSON string containing FnbVariant[]
+  variants?: FnbVariant[] | string; // Array of FnbVariant objects or JSON string (for backward compatibility)
 }
 
 interface FnbMenu {

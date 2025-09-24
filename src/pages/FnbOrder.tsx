@@ -158,6 +158,22 @@ const FnbOrder: React.FC = () => {
     toast.success(`Đã thêm ${itemName} vào giỏ hàng`);
   };
 
+  // Helper function to parse variants (handle both array and JSON string)
+  const parseVariants = (
+    variants: FnbVariant[] | string | undefined
+  ): FnbVariant[] => {
+    if (!variants) return [];
+    if (Array.isArray(variants)) return variants;
+    if (typeof variants === "string") {
+      try {
+        return JSON.parse(variants);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
   const handleUpdateQuantity = (
     itemId: string,
     quantity: number,
@@ -174,9 +190,7 @@ const FnbOrder: React.FC = () => {
 
     let currentQuantity: number;
     if (variantId) {
-      const variants: FnbVariant[] = item.variants
-        ? JSON.parse(item.variants)
-        : [];
+      const variants: FnbVariant[] = parseVariants(item.variants);
       const variant = variants.find((v) => v._id === variantId);
       currentQuantity = variant
         ? variant.inventory.quantity
@@ -223,9 +237,7 @@ const FnbOrder: React.FC = () => {
 
       if (cartItem.variantId) {
         // Get variant price
-        const variants: FnbVariant[] = item.variants
-          ? JSON.parse(item.variants)
-          : [];
+        const variants: FnbVariant[] = parseVariants(item.variants);
         const variant = variants.find((v) => v._id === cartItem.variantId);
         itemPrice = variant ? variant.price : item.price;
       } else {
@@ -236,8 +248,6 @@ const FnbOrder: React.FC = () => {
       return total + itemPrice * cartItem.quantity;
     }, 0);
   };
-
-  console.log("cart", cart);
 
   const handleSubmitOrder = async () => {
     if (cart.length === 0) {
@@ -526,9 +536,9 @@ const FnbOrder: React.FC = () => {
                     let itemImage = item.image || item.existingImage;
 
                     if (cartItem.variantId) {
-                      const variants: FnbVariant[] = item.variants
-                        ? JSON.parse(item.variants)
-                        : [];
+                      const variants: FnbVariant[] = parseVariants(
+                        item.variants
+                      );
                       variant = variants.find(
                         (v) => v._id === cartItem.variantId
                       );

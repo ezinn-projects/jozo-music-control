@@ -29,8 +29,24 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
 
   const defaultImage = "https://via.placeholder.com/150?text=No+Image";
 
-  // Parse variants from JSON string
-  const variants: FnbVariant[] = item.variants ? JSON.parse(item.variants) : [];
+  // Helper function to parse variants (handle both array and JSON string)
+  const parseVariants = (
+    variants: FnbVariant[] | string | undefined
+  ): FnbVariant[] => {
+    if (!variants) return [];
+    if (Array.isArray(variants)) return variants;
+    if (typeof variants === "string") {
+      try {
+        return JSON.parse(variants);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // Parse variants from array
+  const variants: FnbVariant[] = parseVariants(item.variants);
 
   // Debug: Log variants to check data
   console.log("Variants data:", variants);
