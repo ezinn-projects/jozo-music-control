@@ -9,6 +9,23 @@ interface OrderListProps {
 const OrderList: React.FC<OrderListProps> = ({ orders, isLoading }) => {
   const { data: fnbMenu } = useFnbMenuQuery();
 
+  // Helper function to parse variants (handle both array and JSON string)
+  const parseVariants = (
+    variants: FnbVariant[] | string | undefined
+  ): FnbVariant[] => {
+    if (!variants) return [];
+    if (Array.isArray(variants)) return variants;
+    if (typeof variants === "string") {
+      try {
+        return JSON.parse(variants);
+      } catch (error) {
+        console.error("Error parsing variants:", error);
+        return [];
+      }
+    }
+    return [];
+  };
+
   const getItemName = (itemId: string): string => {
     if (!fnbMenu?.items) return "Unknown Item";
 
@@ -19,7 +36,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders, isLoading }) => {
     // Tìm trong variants
     for (const item of fnbMenu.items) {
       if (item.variants) {
-        const variants: FnbVariant[] = JSON.parse(item.variants);
+        const variants: FnbVariant[] = parseVariants(item.variants);
         const variant = variants.find((v) => v._id === itemId);
         if (variant) return `${item.name} - ${variant.name}`;
       }
