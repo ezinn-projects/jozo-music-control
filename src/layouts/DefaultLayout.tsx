@@ -44,7 +44,7 @@ const Layout: React.FC = () => {
         style={{
           backgroundImage: `url(${categoryImages[backgroundId]})`,
           backgroundSize: "cover",
-          backgroundPosition: "center bottom",
+          backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
         }}
       >
