@@ -113,16 +113,6 @@ const Header: React.FC = () => {
     [roomId, isKaraoke, isSearchPage, isHomePage, navigate]
   );
 
-  // Hủy debounce khi component unmount
-  useEffect(() => {
-    return () => {
-      debouncedNavigate.cancel();
-      debouncedSetTerm.cancel();
-      // Hủy các query đang pending để tránh memory leak
-      queryClient.cancelQueries({ queryKey: ["songName"] });
-    };
-  }, [debouncedNavigate, debouncedSetTerm, queryClient]);
-
   // Click outside để đóng suggestions
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -232,19 +222,43 @@ const Header: React.FC = () => {
     navigate(`/fnb?roomId=${roomId}`);
   };
 
+  // State để track việc đã gửi notification gần đây
+  const [lastNotificationTime, setLastNotificationTime] = useState<number>(0);
+
   const handleNotification = () => {
-    sendNotification(
-      { roomId, message: "Yêu cầu hỗ trợ" },
-      {
-        onSuccess: () => {
-          toast.success("Đã yêu cầu nhân viên hỗ trợ");
-        },
-        onError: () => {
-          toast.error("Gặp lỗi khi yêu cầu nhân viên hỗ trợ");
-        },
-      }
-    );
+    const now = Date.now();
+    const timeSinceLastNotification = now - lastNotificationTime;
+
+    // Nếu chưa gửi notification nào hoặc đã qua 2 giây từ lần cuối
+    if (lastNotificationTime === 0 || timeSinceLastNotification >= 2000) {
+      // Gửi ngay lập tức
+      sendNotification(
+        { roomId, message: "Yêu cầu hỗ trợ" },
+        {
+          onSuccess: () => {
+            toast.success("Đã yêu cầu nhân viên hỗ trợ");
+          },
+          onError: () => {
+            toast.error("Gặp lỗi khi yêu cầu nhân viên hỗ trợ");
+          },
+        }
+      );
+      setLastNotificationTime(now);
+    } else {
+      // Nếu spam quá nhanh, hiển thị thông báo
+      toast.warning("Vui lòng đợi một chút trước khi gửi yêu cầu tiếp theo");
+    }
   };
+
+  // Hủy debounce khi component unmount
+  useEffect(() => {
+    return () => {
+      debouncedNavigate.cancel();
+      debouncedSetTerm.cancel();
+      // Hủy các query đang pending để tránh memory leak
+      queryClient.cancelQueries({ queryKey: ["songName"] });
+    };
+  }, [debouncedNavigate, debouncedSetTerm, queryClient]);
 
   return (
     <header className="bg-black text-white p-4 flex items-center justify-between shadow-md z-50">
