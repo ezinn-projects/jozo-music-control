@@ -61,8 +61,8 @@ const Header: React.FC = () => {
     const query = params.get("query") || "";
     const karaoke = params.get("karaoke") || "true";
 
-    // Chỉ cập nhật khi giá trị thay đổi
-    if (query !== searchState.term) {
+    // Chỉ cập nhật khi giá trị thay đổi và không phải từ việc clear
+    if (query !== inputValueRef.current) {
       setSearchState((prev) => ({
         ...prev,
         term: query,
@@ -73,7 +73,7 @@ const Header: React.FC = () => {
     }
 
     setIsKaraoke(karaoke === "true");
-  }, [location.search]);
+  }, [location.search]); // Sử dụng inputValueRef.current thay vì searchState.term
 
   // Xử lý debounce cho việc cập nhật debouncedTerm
   const debouncedSetTerm = useMemo(
@@ -83,7 +83,7 @@ const Header: React.FC = () => {
           ...prev,
           debouncedTerm: term,
         }));
-      }, 500),
+      }, 800),
     []
   );
 
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
         } else if (!isHomePage) {
           navigate(baseUrl);
         }
-      }, 800),
+      }, 5000),
     [roomId, isKaraoke, isSearchPage, isHomePage, navigate]
   );
 
@@ -118,8 +118,10 @@ const Header: React.FC = () => {
     return () => {
       debouncedNavigate.cancel();
       debouncedSetTerm.cancel();
+      // Hủy các query đang pending để tránh memory leak
+      queryClient.cancelQueries({ queryKey: ["songName"] });
     };
-  }, [debouncedNavigate, debouncedSetTerm]);
+  }, [debouncedNavigate, debouncedSetTerm, queryClient]);
 
   // Click outside để đóng suggestions
   useEffect(() => {

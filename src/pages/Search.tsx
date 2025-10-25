@@ -31,7 +31,7 @@ const SearchPage: React.FC = () => {
     debounce((trimmedQuery: string) => {
       setProcessedQuery(trimmedQuery);
       setShouldSearch(true);
-    }, 500),
+    }, 1000), // Thay đổi từ 500ms thành 5000ms (5 giây)
     []
   );
 
