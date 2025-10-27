@@ -4,7 +4,79 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export const useFnbMutations = () => {
   const queryClient = useQueryClient();
 
-  // Mutation để đặt đơn hàng
+  // Mutation để thêm món vào order (cộng dồn)
+  const addToOrder = useMutation({
+    mutationFn: async ({
+      payload,
+      roomId,
+    }: {
+      payload: CreateFnbOrderPayload;
+      roomId: string;
+    }) => {
+      console.log(
+        "📤 Sending add request to:",
+        `/client/fnb/orders/room/${roomId}/add`
+      );
+      console.log("📤 Payload:", JSON.stringify(payload, null, 2));
+      const response = await http.post<ApiResponse<FnbOrder>>(
+        `/client/fnb/orders/room/${roomId}/add`,
+        payload
+      );
+      console.log("📥 Received response:", response.data);
+      return response.data.result;
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate query để refetch order mới nhất
+      // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
+      queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
+    },
+  });
+
+  // Mutation để giảm món khỏi order
+  const removeFromOrder = useMutation({
+    mutationFn: async ({
+      payload,
+      roomId,
+    }: {
+      payload: CreateFnbOrderPayload;
+      roomId: string;
+    }) => {
+      const response = await http.post<ApiResponse<FnbOrder>>(
+        `/client/fnb/orders/room/${roomId}/remove`,
+        payload
+      );
+      return response.data.result;
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate query để refetch order mới nhất
+      // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
+      queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
+    },
+  });
+
+  // Mutation để ghi đè toàn bộ order (Set về số lượng cụ thể)
+  const updateOrder = useMutation({
+    mutationFn: async ({
+      payload,
+      roomId,
+    }: {
+      payload: CreateFnbOrderPayload;
+      roomId: string;
+    }) => {
+      const response = await http.put<ApiResponse<FnbOrder>>(
+        `/client/fnb/orders/room/${roomId}`,
+        payload
+      );
+      return response.data.result;
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate query để refetch order mới nhất
+      // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
+      queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
+    },
+  });
+
+  // Mutation cũ (giữ lại để backward compatibility)
   const submitOrder = useMutation({
     mutationFn: async ({
       payload,
@@ -13,53 +85,58 @@ export const useFnbMutations = () => {
       payload: CreateFnbOrderPayload;
       roomId: string;
     }) => {
-      const response = await http.post<ApiResponse<Order>>(
+      const response = await http.put<ApiResponse<FnbOrder>>(
         `/client/fnb/orders/room/${roomId}`,
         payload
       );
       return response.data.result;
     },
-    onSuccess: () => {
-      // Sau khi đặt hàng thành công, invalidate các query liên quan
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    onSuccess: (_, variables) => {
+      // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
       queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
     },
   });
 
-  // Mutation để cập nhật đơn hàng (nếu cần)
-  const updateOrder = useMutation({
-    mutationFn: async (order: Order) => {
-      const response = await http.put<ApiResponse<Order>>(
-        `/orders/${order.id}`,
-        order
+  // Mutation để submit cart lên BE
+  const submitCart = useMutation({
+    mutationFn: async ({
+      payload,
+      roomId,
+    }: {
+      payload: {
+        cart: {
+          drinks: Record<string, number>;
+          snacks: Record<string, number>;
+        };
+      };
+      roomId: string;
+    }) => {
+      console.log(
+        "📤 Submitting cart to:",
+        `/client/fnb/orders/room/${roomId}/submit-cart`
       );
+      console.log("📤 Payload:", JSON.stringify(payload, null, 2));
+      const response = await http.post<ApiResponse<FnbOrder>>(
+        `/client/fnb/orders/room/${roomId}/submit-cart`,
+        payload
+      );
+      console.log("📥 Received response:", response.data);
       return response.data.result;
     },
-    onSuccess: (data) => {
-      // Sau khi cập nhật đơn hàng thành công, invalidate các query liên quan
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["orders", data.id] });
-    },
-  });
-
-  // Mutation để hủy đơn hàng (nếu cần)
-  const cancelOrder = useMutation({
-    mutationFn: async (orderId: string) => {
-      const response = await http.delete<ApiResponse<boolean>>(
-        `/orders/${orderId}`
-      );
-      return response.data.result;
-    },
-    onSuccess: (_, orderId) => {
-      // Sau khi hủy đơn hàng thành công, invalidate các query liên quan
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["orders", orderId] });
+    onSuccess: (_, variables) => {
+      // Invalid queries sau khi submit cart
+      queryClient.invalidateQueries({
+        queryKey: ["fnb-orders", variables.roomId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
     },
   });
 
   return {
-    submitOrder,
+    addToOrder,
+    removeFromOrder,
     updateOrder,
-    cancelOrder,
+    submitOrder, // Giữ lại để backward compatibility
+    submitCart, // API mới để submit cart
   };
 };

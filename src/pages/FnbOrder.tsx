@@ -25,7 +25,7 @@ const FnbOrder: React.FC = () => {
   const [cart, setCart] = useState<OrderItem[]>([]);
   const [categories, setCategories] = useState<FnbCategory[]>([]);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [flyingItem, setFlyingItem] = useState<{
     id: string;
     image: string;
@@ -38,7 +38,8 @@ const FnbOrder: React.FC = () => {
   const navigate = useNavigate();
   const roomId = searchParams.get("roomId") || "1";
   const [activeTab, setActiveTab] = useState<"menu" | "orders">("menu");
-  const { submitOrder } = useFnbMutations();
+  const { submitCart } = useFnbMutations();
+  const isSubmitting = submitCart.isPending;
   const {
     data: orders,
     isLoading: ordersLoading,
@@ -76,11 +77,19 @@ const FnbOrder: React.FC = () => {
     }
   }, [fnbMenu, selectedCategory]);
 
-  const handleAddToCart = (
+  // KHÔNG sync cart từ server - cart chỉ là local state để user build order mới
+
+  const handleAddToCart = async (
     item: FnbItem,
     variant?: FnbVariant,
     buttonElement?: HTMLElement
   ) => {
+    // Prevent double click
+    if (isAdding) {
+      console.log("⏸️ Already processing, skipping duplicate request");
+      return;
+    }
+
     // Kiểm tra số lượng còn lại
     const currentQuantity = variant
       ? variant.inventory.quantity
@@ -89,6 +98,8 @@ const FnbOrder: React.FC = () => {
       toast.error("Sản phẩm đã hết hàng");
       return;
     }
+
+    setIsAdding(true);
 
     // Get item image
     const itemImage = variant?.image || item.image || item.existingImage || "";
@@ -116,46 +127,63 @@ const FnbOrder: React.FC = () => {
       }
     }
 
-    const existingItem = cart.find((cartItem) =>
-      variant
-        ? cartItem.itemId === item._id && cartItem.variantId === variant._id
-        : cartItem.itemId === item._id && !cartItem.variantId
-    );
+    try {
+      // Prepare payload for API
+      const itemId = variant?._id || item._id;
+      const drinks: Record<string, number> = {};
+      const snacks: Record<string, number> = {};
 
-    if (existingItem) {
-      // Kiểm tra số lượng trong cart có vượt quá số lượng còn lại không
-      if (existingItem.quantity >= currentQuantity) {
-        toast.error("Không thể thêm nữa, đã đạt số lượng tối đa");
-        return;
+      if (item.category === "drink") {
+        drinks[itemId] = 1;
+      } else if (item.category === "snack") {
+        snacks[itemId] = 1;
       }
 
-      // Increase quantity if item already in cart
-      setCart(
-        cart.map((cartItem) =>
-          variant
-            ? cartItem.itemId === item._id && cartItem.variantId === variant._id
+      // KHÔNG gọi API ngay, chỉ update local cart state
+      // API sẽ được gọi khi submit
+
+      // Update local cart state
+      const existingItem = cart.find((cartItem) =>
+        variant
+          ? cartItem.itemId === item._id && cartItem.variantId === variant._id
+          : cartItem.itemId === item._id && !cartItem.variantId
+      );
+
+      if (existingItem) {
+        // Increase quantity if item already in cart
+        setCart(
+          cart.map((cartItem) =>
+            variant
+              ? cartItem.itemId === item._id &&
+                cartItem.variantId === variant._id
+                ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                : cartItem
+              : cartItem.itemId === item._id && !cartItem.variantId
               ? { ...cartItem, quantity: cartItem.quantity + 1 }
               : cartItem
-            : cartItem.itemId === item._id && !cartItem.variantId
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        )
-      );
-    } else {
-      // Add new item to cart
-      setCart([
-        ...cart,
-        {
-          category: item.category,
-          itemId: item._id,
-          variantId: variant?._id,
-          quantity: 1,
-        },
-      ]);
-    }
+          )
+        );
+      } else {
+        // Add new item to cart
+        setCart([
+          ...cart,
+          {
+            category: item.category,
+            itemId: item._id,
+            variantId: variant?._id,
+            quantity: 1,
+          },
+        ]);
+      }
 
-    const itemName = variant ? `${item.name} - ${variant.name}` : item.name;
-    toast.success(`Đã thêm ${itemName} vào giỏ hàng`);
+      const itemName = variant ? `${item.name} - ${variant.name}` : item.name;
+      toast.success(`Đã thêm ${itemName} vào giỏ hàng`);
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      toast.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại!");
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   // Helper function to parse variants (handle both array and JSON string)
@@ -174,7 +202,7 @@ const FnbOrder: React.FC = () => {
     return [];
   };
 
-  const handleUpdateQuantity = (
+  const handleUpdateQuantity = async (
     itemId: string,
     quantity: number,
     variantId?: string
@@ -205,6 +233,8 @@ const FnbOrder: React.FC = () => {
       return;
     }
 
+    // Chỉ update local cart state, KHÔNG gọi API ngay
+    // API sẽ được gọi khi submit
     setCart(
       cart.map((item) =>
         variantId
@@ -219,6 +249,8 @@ const FnbOrder: React.FC = () => {
   };
 
   const handleRemoveFromCart = (itemId: string, variantId?: string) => {
+    // Chỉ update local cart state, KHÔNG gọi API ngay
+    // API sẽ được gọi khi submit
     setCart(
       cart.filter((item) =>
         variantId
@@ -255,56 +287,42 @@ const FnbOrder: React.FC = () => {
       return;
     }
 
-    setIsSubmitting(true);
+    // Build payload từ cart với format mới
+    const drinks: Record<string, number> = {};
+    const snacks: Record<string, number> = {};
+
+    cart.forEach((cartItem) => {
+      const item = fnbMenu?.items.find((i) => i._id === cartItem.itemId);
+      if (!item) return;
+
+      const cartItemId = cartItem.variantId || cartItem.itemId;
+      if (item.category === "drink") {
+        drinks[cartItemId] = (drinks[cartItemId] || 0) + cartItem.quantity;
+      } else if (item.category === "snack") {
+        snacks[cartItemId] = (snacks[cartItemId] || 0) + cartItem.quantity;
+      }
+    });
+
+    const payload = {
+      cart: { drinks, snacks },
+    };
 
     try {
-      // Group items theo category
-      const drinks: Record<string, number> = {};
-      const snacks: Record<string, number> = {};
-
-      cart.forEach((cartItem) => {
-        const item = fnbMenu?.items.find((i) => i._id === cartItem.itemId);
-        if (!item) return;
-
-        // Xác định itemId - sử dụng unique key để tránh conflict
-        let itemId: string;
-        if (cartItem.variantId) {
-          // Nếu có variant, sử dụng variant ID
-          itemId = cartItem.variantId;
-        } else {
-          // Nếu không có variant, sử dụng item ID
-          itemId = item._id;
-        }
-
-        // Group theo category
-        if (item.category === "drink") {
-          drinks[itemId] = (drinks[itemId] || 0) + cartItem.quantity;
-        } else if (item.category === "snack") {
-          snacks[itemId] = (snacks[itemId] || 0) + cartItem.quantity;
-        }
-      });
-
-      const payload: CreateFnbOrderPayload = {
-        order: {
-          drinks,
-          snacks,
-        },
-      };
-
-      await submitOrder.mutateAsync({ payload, roomId });
+      // Gọi API mới submit-cart
+      await submitCart.mutateAsync({ payload, roomId });
 
       toast.success("Đã gửi đơn hàng thành công!");
-      setCart([]);
       setIsCartModalOpen(false);
+
+      // Clear cart sau khi submit để user có thể tạo order mới
+      setCart([]);
 
       // Refetch orders và menu để cập nhật danh sách và số lượng
       refetchOrders();
       refetchMenu();
     } catch (error) {
-      toast.error("Đặt hàng thất bại. Vui lòng thử lại sau!");
-      console.error("Order error:", error);
-    } finally {
-      setIsSubmitting(false);
+      console.error("Submit order error:", error);
+      toast.error("Đặt hàng thất bại. Vui lòng thử lại!");
     }
   };
 
@@ -430,6 +448,7 @@ const FnbOrder: React.FC = () => {
                       onUpdateQuantity={handleUpdateQuantity}
                       onRemoveFromCart={handleRemoveFromCart}
                       onOpenCart={() => setIsCartModalOpen(true)}
+                      isSubmitting={isSubmitting}
                     />
                   ))}
                 </div>
@@ -445,7 +464,8 @@ const FnbOrder: React.FC = () => {
               </h2>
               <button
                 onClick={() => refetchOrders()}
-                className="px-4 py-2 bg-gradient-to-r from-lightpink to-pink-500 text-white rounded-xl hover:from-lightpink/90 hover:to-pink-500/90 transition-all duration-200 flex items-center space-x-2"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-gradient-to-r from-lightpink to-pink-500 text-white rounded-xl hover:from-lightpink/90 hover:to-pink-500/90 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg
                   className="w-4 h-4"
@@ -473,7 +493,8 @@ const FnbOrder: React.FC = () => {
         <div className="fixed bottom-20 right-6 z-30">
           <button
             onClick={() => setIsCartModalOpen(true)}
-            className="floating-cart-button bg-gradient-to-r from-lightpink to-pink-500 text-white p-3 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center"
+            disabled={isSubmitting}
+            className="floating-cart-button bg-gradient-to-r from-lightpink to-pink-500 text-white p-3 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <div className="relative">
               <svg
@@ -591,7 +612,8 @@ const FnbOrder: React.FC = () => {
                         {/* Quantity Controls */}
                         <div className="flex items-center space-x-2">
                           <button
-                            className="w-7 h-7 rounded-full bg-white border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+                            className="w-7 h-7 rounded-full bg-white border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isSubmitting}
                             onClick={() =>
                               handleUpdateQuantity(
                                 item._id,
@@ -618,7 +640,8 @@ const FnbOrder: React.FC = () => {
                             {cartItem.quantity}
                           </span>
                           <button
-                            className="w-7 h-7 rounded-full bg-white border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+                            className="w-7 h-7 rounded-full bg-white border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isSubmitting}
                             onClick={() =>
                               handleUpdateQuantity(
                                 item._id,
@@ -648,7 +671,8 @@ const FnbOrder: React.FC = () => {
                           onClick={() =>
                             handleRemoveFromCart(item._id, cartItem.variantId)
                           }
-                          className="flex-shrink-0 p-1.5 hover:bg-red-50 rounded-full transition-colors"
+                          disabled={isSubmitting}
+                          className="flex-shrink-0 p-1.5 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <svg
                             className="w-4 h-4 text-red-500"
@@ -681,11 +705,7 @@ const FnbOrder: React.FC = () => {
                   </span>
                 </div>
                 <button
-                  className={`w-full py-2.5 rounded-2xl font-semibold text-base transition-all ${
-                    isSubmitting
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-lightpink to-pink-500 text-white hover:from-lightpink/90 hover:to-pink-500/90 hover:shadow-lg"
-                  }`}
+                  className="w-full py-2.5 rounded-2xl font-semibold text-base transition-all bg-gradient-to-r from-lightpink to-pink-500 text-white hover:from-lightpink/90 hover:to-pink-500/90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none relative"
                   onClick={handleSubmitOrder}
                   disabled={isSubmitting}
                 >

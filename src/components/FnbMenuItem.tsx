@@ -15,6 +15,7 @@ interface FnbMenuItemProps {
   ) => void;
   onRemoveFromCart?: (itemId: string, variantId?: string) => void;
   onOpenCart?: () => void;
+  isSubmitting?: boolean;
 }
 
 const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
@@ -24,6 +25,7 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
   onUpdateQuantity,
   onRemoveFromCart,
   onOpenCart,
+  isSubmitting = false,
 }) => {
   const [showVariantsModal, setShowVariantsModal] = useState(false);
 
@@ -48,9 +50,6 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
   // Parse variants from array
   const variants: FnbVariant[] = parseVariants(item.variants);
 
-  // Debug: Log variants to check data
-  console.log("Variants data:", variants);
-
   // Helper function to get quantity in cart for item
   const getItemQuantityInCart = (
     itemId: string,
@@ -65,12 +64,16 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
   };
 
   // Helper function to get remaining quantity for item
-  const getRemainingQuantity = (itemId: string, variantId?: string): number => {
+  // Vì chỉ update local state (không gọi API ngay), nên cần trừ cart quantity
+  const getRemainingQuantity = (
+    _itemId: string,
+    variantId?: string
+  ): number => {
     const baseQuantity = variantId
       ? variants.find((v) => v._id === variantId)?.inventory.quantity || 0
       : item.inventory?.quantity || parseInt(item.quantity || "0");
 
-    const cartQuantity = getItemQuantityInCart(itemId, variantId);
+    const cartQuantity = getItemQuantityInCart(_itemId, variantId);
     return Math.max(0, baseQuantity - cartQuantity);
   };
 
@@ -325,7 +328,8 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
 
                               <div className="flex items-center space-x-1">
                                 <button
-                                  className="w-6 h-6 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors text-xs"
+                                  className="w-6 h-6 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={isSubmitting}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleVariantQuantityChange(
@@ -354,7 +358,8 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
                                 </span>
 
                                 <button
-                                  className="w-6 h-6 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors text-xs"
+                                  className="w-6 h-6 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={isSubmitting}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleVariantQuantityChange(variant._id, 1);
@@ -450,7 +455,8 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
 
             <div className="flex items-center space-x-2">
               <button
-                className="w-8 h-8 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors"
+                className="w-8 h-8 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
                 onClick={() => handleItemQuantityChange(-1)}
               >
                 <svg
@@ -473,7 +479,8 @@ const FnbMenuItem: React.FC<FnbMenuItemProps> = ({
               </span>
 
               <button
-                className="w-8 h-8 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors"
+                className="w-8 h-8 rounded-full bg-lightpink text-white flex items-center justify-center hover:bg-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
                 onClick={(e) => handleItemQuantityChange(1, e.currentTarget)}
               >
                 <svg

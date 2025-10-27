@@ -9,6 +9,8 @@ interface OrderListProps {
 const OrderList: React.FC<OrderListProps> = ({ orders, isLoading }) => {
   const { data: fnbMenu } = useFnbMenuQuery();
 
+  console.log("orders", orders);
+
   // Helper function to parse variants (handle both array and JSON string)
   const parseVariants = (
     variants: FnbVariant[] | string | undefined
@@ -125,13 +127,13 @@ const OrderList: React.FC<OrderListProps> = ({ orders, isLoading }) => {
           {/* Order Items */}
           <div className="space-y-3">
             {/* Drinks */}
-            {Object.keys(order.order.drinks).length > 0 && (
+            {Object.keys(order?.order?.drinks || {}).length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
                   Drinks
                 </h4>
                 <div className="space-y-2">
-                  {Object.entries(order.order.drinks).map(
+                  {Object.entries(order?.order?.drinks || {}).map(
                     ([itemId, quantity]) => (
                       <div
                         key={itemId}
@@ -151,13 +153,13 @@ const OrderList: React.FC<OrderListProps> = ({ orders, isLoading }) => {
             )}
 
             {/* Snacks */}
-            {Object.keys(order.order.snacks).length > 0 && (
+            {Object.keys(order?.order?.snacks || {}).length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
                   Snacks
                 </h4>
                 <div className="space-y-2">
-                  {Object.entries(order.order.snacks).map(
+                  {Object.entries(order?.order?.snacks || {}).map(
                     ([itemId, quantity]) => (
                       <div
                         key={itemId}
