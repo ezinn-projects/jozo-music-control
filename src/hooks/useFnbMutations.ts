@@ -25,7 +25,7 @@ export const useFnbMutations = () => {
       console.log("📥 Received response:", response.data);
       return response.data.result;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       // Invalidate query để refetch order mới nhất
       // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
       queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
@@ -47,7 +47,7 @@ export const useFnbMutations = () => {
       );
       return response.data.result;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       // Invalidate query để refetch order mới nhất
       // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
       queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
@@ -69,7 +69,7 @@ export const useFnbMutations = () => {
       );
       return response.data.result;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       // Invalidate query để refetch order mới nhất
       // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
       queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
@@ -91,7 +91,7 @@ export const useFnbMutations = () => {
       );
       return response.data.result;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       // Chỉ invalidate menu để cập nhật inventory, KHÔNG refetch orders để tránh sync lại cart
       queryClient.invalidateQueries({ queryKey: ["fnbMenu"] });
     },
