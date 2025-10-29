@@ -1,5 +1,6 @@
 import BellAlertIcon from "@/assets/icons/BellAlertIcon";
 import HomeIcon from "@/assets/icons/HomeIcon";
+import ListIcon from "@/assets/icons/ListIcon";
 import { logo } from "@/assets/images";
 import useRoom from "@/hooks/useRoom";
 import { useSongName } from "@/hooks/useSongName";
@@ -9,6 +10,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Switch from "./Switch";
 import { toast } from "./ToastContainer";
+import BookingCodeModal from "./BookingCodeModal";
 
 // Icon component for F&B
 const FoodIcon: React.FC = () => (
@@ -225,6 +227,9 @@ const Header: React.FC = () => {
   // State để track việc đã gửi notification gần đây
   const [lastNotificationTime, setLastNotificationTime] = useState<number>(0);
 
+  // State để mở/đóng modal booking code
+  const [isBookingCodeModalOpen, setIsBookingCodeModalOpen] = useState(false);
+
   const handleNotification = () => {
     const now = Date.now();
     const timeSinceLastNotification = now - lastNotificationTime;
@@ -385,6 +390,14 @@ const Header: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setIsBookingCodeModalOpen(true)}
+          className="text-lightpink hover:text-lightpink/80"
+          title="Nhập mã đặt chỗ"
+        >
+          <ListIcon />
+        </button>
+
+        <button
           onClick={handleFnbNavigation}
           className="text-lightpink hover:text-lightpink/80"
           title="Đặt đồ ăn & thức uống"
@@ -396,6 +409,13 @@ const Header: React.FC = () => {
           <BellAlertIcon />
         </button>
       </div>
+
+      {/* Booking Code Modal */}
+      <BookingCodeModal
+        isOpen={isBookingCodeModalOpen}
+        onClose={() => setIsBookingCodeModalOpen(false)}
+        roomId={roomId}
+      />
     </header>
   );
 };

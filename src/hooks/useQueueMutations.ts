@@ -235,3 +235,54 @@ export const useUpdateQueueOrder = () => {
     },
   });
 };
+
+export const useAddAllSongs = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      roomId,
+      songs,
+    }: {
+      roomId: string;
+      songs: Video[];
+    }) => {
+      const response = await http.post<
+        ApiResponse<{ queue: Video[]; nowPlaying: Video }>
+      >(`/room-music/${roomId}/add-songs`, {
+        songs,
+      });
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      toast.success(
+        `Đã thêm ${variables.songs.length} bài hát vào danh sách thành công!`
+      );
+      queryClient.setQueryData(
+        ["queue", variables.roomId],
+        (
+          oldData:
+            | ApiResponse<{
+                nowPlaying: Video;
+                queue: Video[];
+              }>
+            | undefined
+        ) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            result: {
+              ...oldData.result,
+              ...data.result,
+            },
+          };
+        }
+      );
+    },
+    onError: (_: AxiosError, variables) => {
+      toast.error(
+        `Không thể thêm ${variables.songs.length} bài hát vào danh sách.`
+      );
+    },
+  });
+};

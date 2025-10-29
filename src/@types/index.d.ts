@@ -10,6 +10,7 @@ interface Video {
   author: string;
   duration: number; // Nếu cần thời lượng
   url?: string; // URL của video (optional)
+  position?: "top" | "end"; // Vị trí trong queue (top hoặc end)
 }
 
 interface YouTubeSearchResponse {
